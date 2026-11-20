@@ -3,7 +3,7 @@
 **Project:** LATFUN6, open ECP5-5G application board
 **Board:** LATFUN6 rev v0.2. File `hardware/EDA/Latfun6.eprj`, PCB document `pcb1`.
 **Date started:** 2026-11-20
-**Status:** W1 (plan written) · W2 blocked on J12 footprint
+**Status:** W2 placement draft v1 computed and checked on a copy; waiting for EDA to close before writing
 **Schematic worknote:** `latfun6_worknote.md` (gates A2 / C3 / C4 / D PASS, 2026-11-20)
 **EasyEDA Pro version:** ✱ record at the first EDA session (file format check per `eprj_file_format.md` §8)
 
@@ -80,6 +80,52 @@ Draft, to confirm once J12's finger datum is known. Bracket edge = left (x = 0),
 - courtyard = pads ∪ body ∪ silk;
 - decaps ≤ 3 mm from their pins (BGA decaps on the bottom under the ball field);
 - the escape-via zone of U5 and U30 (ball field + 1.5 mm) kept free of other parts on both sides, except decaps placed between the via sites.
+
+
+### Placement draft v1 (2026-11-20), `tools/layout/placer.py` → `plan_v1.json`, preview `placement_draft_v1.png`
+
+**Starting state (file):**
+- J12 footprint attached; 6 copper layers; all 451 parts imported.
+- User outline: rectangle 168 × 110 mm, r 5 mm.
+
+**Outline (new):**
+- Body 167.65 × 102.75 mm, r 5 mm. The outline is open across the PCIe tab, because J12's footprint draws the tab on the outline layer: 8.4 mm deep, key notch, chamfers.
+- Tab tip at 111.15 mm, which equals the CEM full height measured to the finger tip. The 110 mm frame was 7 mm too tall, since the tab is extra.
+- J12 key-notch centre 57.15 mm from the bracket end ✱. Secondary source (a project citing CEM Figures 6-7/6-9); confirm against a CEM-based template before fab.
+
+**U5 orientation (rot 270)**, from the ball map:
+- SERDES edge faces the bracket and fingers; DDR3 faces up to U30.
+- Ethernet/ULPI/PMOD face down; HDMI/SD/user I/O face right.
+- One PCIe/SFP crossing is unavoidable in every orientation. It stays inside the ≤ 2 vias per lane budget: PCIe RX lands on the bottom-side A fingers anyway.
+
+**Bracket column, top → bottom:** HDMI J3, USB-C J1 (FT2232H), SFP cage J14 (board edge at the cage footprint's outline mark), RJ45 J19, USB-C J20 (ULPI), 12 V jack J11. Each connector's IC sits directly behind it.
+
+**Top edge:**
+- SMA J15–J18, x 34.5–70.5, edge launch, each with its AC cap under the centre pin.
+- PROGRAMN SW1, buttons SW2–5, DIP SW6, audio J4, LA header J9/J10.
+- microSD J21, card inserted from the top.
+
+**Rear edge:** PMOD J5–J8, facing out.
+
+**Bottom strip:**
+- 12 V OR next to the jack and the slot 12 V pins.
+- 5 V buck, mux and 3V3/1V8/2V5 regulators at the bottom right.
+- 1V2 core buck U3 15 mm from U5; 1V35 U24 beside U30; 1V2_SER U26 on the SERDES side.
+
+**Placement rules:**
+- **Corridors kept free of top-side parts:** PCIe (x 57.5–65.8, y 52–101.5) with C322/C323 placed at the B14/B15 fingers; SFP channel U5 → cage; SMA corridor to the top edge.
+- **BGA decaps** (62 parts) on the bottom, in the band under the two outer ball rings (they escape on Top, so no vias there) and just outside. Exact positions follow the fan-out (W5b).
+
+**Checks:**
+- Pad-to-pad (exact shapes, `padcheck.py`): **0 pairs < 0.6 mm**.
+- No non-edge part off the outline.
+- PAD_NET identical before and after.
+
+**Open ✱ items:**
+1. J13 SFP connector position inside the cage: placed at cage x +8.5 mm, rotated 90°. Must be checked against the TE 2227302-1 / 1888247-1 application drawing; pin-1 side decides TD/RD.
+2. Bracket screw holes / keep-outs (CEM full-height bracket) are not reserved yet.
+3. Connector overhang at the bracket: USB-C/HDMI 1 mm, RJ45 2 mm, jack 0.5 mm. Confirm in 3D against a bracket.
+4. J9 LA header and J10 are vertical male headers at the top-right inner area.
 
 ## Section 5 — Net classes and widths (from §1 only)
 
