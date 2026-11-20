@@ -1,5 +1,8 @@
 # LATFUN6 Schematic Worknote
 
+> ⚠ **RE-BASELINE IN PROGRESS (2026-11-20): definition v0.2, application board.** FPGA → LFE5UM5G-45F-8BG381 (85F-ready); adds SFP + SMA + PCIe x1 (SERDES), DDR3L 512 MB, GbE (RTL8211F), microSD, USB 2.0 ULPI, 12 V slot power. Core rail 1.1 → **1.2 V**. Sections below still describe v0.1 where not yet updated; blocks A/B(partly)/D/E/F/H placements are reused. U5 (BG256) and `board/latfun6.json`/`.lpf` (v0.1) are **superseded** and will be regenerated against the ECP5-5G-45 CSV. See `docs/definition.md` §8.
+
+
 **Project:** LATFUN6, the open ECP5 textbook board for the Open FPGA Tutorial
 **Board:** latfun6 rev v0.1
 **Date started:** 2026-11-20

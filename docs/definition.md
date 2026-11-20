@@ -1,138 +1,122 @@
-# LATFUN6 — Board Definition v0.1 (draft)
+# LATFUN6: Board Definition v0.2 (application board)
 
-> The open ECP5 **textbook board** for the Open FPGA Tutorial. Defined by the curriculum: every on-board feature maps to a lab.
-> Status: **draft for review**, 2026-11-20. Source of truth for the schematic phase (`pcb-schematic` skill).
-> Inputs: project hand-off and a ULX3S study (private working notes, not published).
+> The open ECP5-5G board for the Open FPGA Tutorial: **from verified RTL to real systems**. Linux-class SoCs, multi-gigabit links, networking and video, with the verification-first features kept.
+> Status: **v0.2 draft, 2026-11-20.** Replaces v0.1 (25F CABGA256 textbook board, see git history). Source of truth for the schematic re-baseline.
+> Positioning: ULX3S answers *"what can I build with an FPGA?"*. LATFUN6 answers *"how do I build and **prove** a real system?"*: DDR3 + Linux, 5 Gb/s SERDES with SFP/SMA/PCIe, Gigabit Ethernet, USB 2.0, HDMI, with test points, shunts, an LA header and a self-test on every interface.
 
-## 1. Decisions (locked 2026-11-20)
+## 1. Decisions
 
-| # | Decision | Choice |
-|---|---|---|
-| D1 | CAD | **EasyEDA Pro** (existing skills + MCP + JLCPCB/LCSC pipeline). Publish sources + PDF + Gerber/BOM/CPL |
-| D2 | Scope | **HDMI on board, SDRAM off.** Grow via PMOD |
-| D3 | FPGA | LFE5U-25F CABGA256. **Placed part: LFE5U-25F-7BG256I** (C1550762) because the -6BG256C is ZERO_STOCK at JLCPCB (see `hardware/latfun6/FPGA_Availability_Note.md`). Ball map **verified identical to LFE5U-45F** (Lattice CSVs). No SERDES: Ch 13 labs optional, possible later "pro" (UM) variant |
-| D4 | Licence | **CERN-OHL-S v2** hardware · CC BY-SA 4.0 docs · MIT code |
-| D5 | Clock | 25 MHz oscillator |
-| D6 | Programming | One USB-C: power + FT2232H-class JTAG (ch A) + UART (ch B), `openFPGALoader` out of the box |
+| # | Decision | Choice | Date |
+|---|---|---|---|
+| D1 | CAD | EasyEDA Pro, single schematic page (A0) | 2026-11-20 |
+| D2 | Scope | **Application board**: SERDES, DDR3L, GbE, USB 2.0, microSD, HDMI, audio, UI, 4 PMOD | 2026-11-20 (supersedes v0.1 D2) |
+| D3 | FPGA | **LFE5UM5G-45F-8BG381** (C or I), **85F-ready**: same CABGA381 footprint; balls **K16/K17 stay unused** (NC on 45F, I/O on 85F) | 2026-11-20 (supersedes v0.1 D3) |
+| D4 | Licence | CERN-OHL-S-2.0 hardware · CC BY-SA 4.0 docs · MIT code | 2026-11-20 |
+| D5 | Clock | 25 MHz system oscillator + SERDES reference oscillator(s) | 2026-11-20 |
+| D6 | Programming | One USB-C: power + FT2232H JTAG (ch A) + UART (ch B) | 2026-11-20 |
+| D7 | Sourcing | JLCPCB assembly; parts JLCPCB lacks (FPGA) are bought elsewhere and consigned | 2026-11-20 |
+| D8 | Course | The playground and course move to the same device (`nextpnr-ecp5 --um5g-45k --package CABGA381`) | 2026-11-20 (user upgrades tutorial repo) |
 
-**Still open (placeholders used):** public name (codename `LATFUN6`), positioning (assumed: course first, usable as a general board), price/channel (assumed: JLCPCB-assembled, target below), board size.
+Supply check (2026-11-20): DigiKey LFE5UM5G-45F-8BG381C **44 pcs, $78.21**; -8BG381I **54 pcs, $86.08**; Active. 85F BG381 $138–147, restock 2027. JLCPCB: all UM5G at 0 ⇒ consign.
 
-## 2. Requirements table
+### Facts verified from the Lattice pinout CSVs (ECP5-5G-45 / -85, CABGA381)
+- 381 balls, **203 user I/O** (85F: 205, the two extra being K16/K17).
+- **2 DCUs × 2 channels = 4 SERDES lanes** (HDTX/HDRX D0CH0/1, D1CH0/1), **REFCLKP/N_D0 and _D1**, supplies VCCA0/1, VCCAUXA0/1, VCCHRX ×4, VCCHTX ×4.
+- I/O per bank: 0: 27 · 1: 33 · 2: 32 · 3: 33 · 6: 33 · 7: 32 · 8: 13 (config shared). DQS groups (DDR) exist only in banks 2, 3, 6, 7.
 
-Priority: **M** must · **S** should · **C** could · **X** out (with reason).
+## 2. Requirements (v0.1 R1–R22 carried over unless changed)
 
-| ID | Feature | Lab(s) | Interface / notes | Pri |
+| ID | Feature | Lab / application | Interface notes | Pri |
 |---|---|---|---|---|
-| R1 | 25 MHz oscillator, 3.3 V CMOS, on a PCLK-capable pin; TP on the clock | 1.1, 4.1, all | Global clock input pin; TP_CLK25 + GND pad | M |
-| R2 | 8 user LEDs | 1.1, 3.3, 4.x, 5.x | Active-high, FPGA → resistor → LED → GND | M |
-| R3 | User buttons: 1 × RESET (user, not PROGRAMN) + 3 × user (one deliberately **un-debounced**) | 4.3, 5.2, Showcase A `btn_fire` | Active-low with pull-up, **no RC on BTN1** (bounce lab); RC option footprint on others | M |
-| R4 | 4-position DIP switch | Showcase A `sw_cont`, `sw_len[1:0]` | Active-low, pull-ups | M |
-| R5 | USB-UART (FT2232H ch B), 115200+ baud, RTS/CTS to FPGA | 5.x logging, 9.1, 11.1 | Nets named from FPGA side: `UART_TX` (FPGA→PC), `UART_RX` (PC→FPGA) | M |
-| R6 | Fast JTAG (FT2232H ch A, MPSSE) | 1.1, 16.3, 18.1 | `openFPGALoader -b latfun6`; TCK 4.7 k pull-down, TMS/TDI/TDO pull-ups | M |
-| R7 | External JTAG header | 18.1 (recovery), debug | 2×5 1.27 mm or 2.54 mm, **wired by pin number**, checked pin by pin | S |
-| R8 | Config SPI flash W25Q128JV-class (QSPI), user access via `USRMCLK` | 11.2, 16.3 | **4.7 k pull-up on CSSPIN**; 1 k pull-up on CCLK; CFG[2:0]=010 | M |
-| R9 | Config status: PROGRAMN button, INITN, DONE LED (+pull-ups) | 16.3, 18.1 | Per TN-02038 | M |
-| R10 | On-board I²C EEPROM 24C02 + pull-ups (4.7 k) | 11.3 | 3.3 V; address shown on silkscreen | M |
-| R11 | Audio out: 2 × PWM/ΔΣ pins → RC low-pass → 3.5 mm stereo jack | 14.1 | 2nd-order RC, AC-coupled, ESD; line level | M |
-| R12 | HDMI/DVI out (type-A) | 15.1 | 4 TMDS pairs on adjacent differential-capable pins (LVCMOS33D as on ULX3S), DDC via level shifter to 5 V, 5 V to monitor via current-limited switch, HPD input, ESD array | M |
-| R13 | 4 × PMOD (2×6, 3.3 V), pins assigned as **differential-capable pairs** | Showcases A/B, growth | Showcase B needs 22 GPIO, A needs a diff pair | M |
-| R14 | Logic-analyser header: 8 FPGA-driven probe channels + GND, sigrok/Saleae-friendly 2×5 | 9.2, 9.3 cross-check | FPGA routes internal signals out | S |
-| R15 | Labelled test points with adjacent GND pads | all (verification-first) | CLK25, RESET, UART TX/RX, I²C SCL/SDA, flash SCK/CS, PLL-out pin, DONE, INITN | M |
-| R16 | Rail current sensing: series shunt + Kelvin TPs on 1.1 V, 2.5 V, 3.3 V | 17.3 | e.g. 0.05–0.1 Ω 1 % shunts; drop < 1 % of rail at max load | M |
-| R17 | Loopback jumper pair (2 FPGA pins on a 2-pin header with jumper fitted) | self-test, 8.x on hardware | Factory test detects jumper | S |
-| R18 | Power LED (3.3 V) + DONE LED | 18.1 smoke test | | M |
-| R19 | Factory self-test bitstream in flash: PASS/FAIL per peripheral over UART | 18.1 | Firmware deliverable, not hardware | M |
-| R20 | Mounting holes (4 × M3), rubber feet | — | | M |
-| R21 | `board.json` → `.lpf`, docs, examples | 16.1, AI agents | Software deliverable; pinout frozen at v1.0 | M |
-| R22 | LVDS-capable pair for Showcase A | Showcase A LVDS exercise | **Verified** (DS-02012 §2.14, Table 3.x): LVDS25 output needs VCCIO = 2.5 V, only on A/B pairs of banks 2/3/6/7; diff inputs only in L/R banks. Implemented: every PMOD sits alone on one L/R bank using A/B pairs, so a 2.5 V-PMOD variant is a single-bank change. v0.1 keeps all banks 3.3 V (LVCMOS33D for Showcase A) | S/C |
-| X1 | SDRAM | 10.x | X for v1: Ch 10 labs use on-chip EBR (D2) | X |
-| X2 | SERDES | 13.2, 13.3 | X: needs LFE5UM (D3) | X |
-| X3 | ESP32 / Wi-Fi | — | X: JTAG-takeover risk (principle 9); PMOD instead | X |
-| X4 | micro-SD, ADC, RTC, 2nd USB | — | X: no lab uses them; PMOD | X |
-| X5 | VCCIO selector jumper | — | X: fixed bank voltages, documented (lesson §5) | X |
+| R1–R21 | Clock, LEDs, buttons, DIP, UART, JTAG, flash, config, EEPROM, audio, HDMI, PMOD, LA header, test points, shunts, loopback, LEDs, self-test, holes, board.json | as v0.1 | unchanged except: core rail is **1.2 V** (ECP5-5G), EEPROM also stores the **Ethernet MAC** | M |
+| R23 | **SFP cage** on SERDES DCU1 CH0 | 1000BASE-X / 2.5GBASE-X Ethernet, fibre/DAC loopback, BER with real optics | TX AC-coupled; SFP control (TX_DISABLE, LOS, MOD_ABS, RS) + module I²C at 3.3 V; 3.3 V supply with SFP filter | M |
+| R24 | **2 SMA pairs** (TX±, RX±) on DCU1 CH1 | cable loopback, eye/BER with instruments, board-to-board links | AC-coupled, 100 Ω diff, edge-launch SMA | M |
+| R25 | **PCIe x1 edge** on DCU0 CH0 | Gen1/Gen2 endpoint: PC accelerator, DMA labs (LitePCIe) | 100 MHz REFCLK from slot → REFCLK_D0; TX AC caps on card; PERST#, WAKE#, CLKREQ# sideband; **card outline = PCIe low-profile add-in card** | M |
+| R26 | **DDR3L x16, 4 Gb (512 MB)**, MT41K256M16 | Linux on LiteX (VexRiscv/NaxRiscv), framebuffers, capture buffers | banks 6+7 at 1.35 V, DQS groups; VREF divider; no VTT island (single point-to-point x16, ODT on both ends) | M |
+| R27 | **Gigabit Ethernet RJ45**, RTL8211F RGMII + magjack | LiteEth, Linux networking, remote labs | RGMII at 3.3 V, 125 MHz; MDC/MDIO, PHY reset/int; MAC from EEPROM | M |
+| R28 | **microSD** | Linux rootfs, data logging, SD-mode and SPI labs | 4-bit SD + detect, 3.3 V | M |
+| R29 | **USB 2.0 ULPI PHY** + second USB-C (device/host) | LiteX USB, Linux gadget/host, USB protocol labs | USB3320-class, 12-pin ULPI at 3.3 V, 60 MHz from PHY; VBUS switch for host mode | M |
+| R30 | SERDES reference clock | SFP/SMA lanes | local low-jitter differential oscillator (125 MHz class, LVDS/HCSL) → REFCLK_D1 | M |
+| R31 | Dual power entry | standalone on USB-C, or powered from the PCIe slot | 12 V slot → 5 V buck; USB-C 5 V; ideal-diode / power-mux OR into 5V_SYS; no back-feed into USB or slot | M |
+| R32 | DCU0 CH1 (4th lane) | spare | AC-cap pads + test points, or second SMA pair (decide at layout) | C |
+| X1 | ~~SDRAM~~ | now covered by R26 | | — |
+| X2 | ~~SERDES out~~ | now R23–R25 | | — |
+| X3 | ESP32 / Wi-Fi | — | out: JTAG-takeover risk; PMOD instead | X |
+| X5 | VCCIO selector jumper | — | out: fixed bank voltages | X |
 
 ## 3. Block diagram
 
 ```
- USB-C ──┬─ CC1/CC2 5.1k→GND
- (5 V)   ├─ VBUS → eFuse/PTC + TVS + reverse-current protection → 5V_SYS
-         └─ D+/D- → FT2232H ──ch A MPSSE── JTAG ──┬── ECP5 LFE5U-25F (CABGA256)
-                     │  93LC56 EEPROM            └── ext JTAG 2×5
-                     │  12 MHz xtal
-                     └──ch B UART (TX/RX/RTS/CTS) ──── ECP5
-
- ECP5 ── bank 8 (config) ── W25Q128JV QSPI flash (CSSPIN 4.7k PU, CCLK 1k PU)
-      ── 25 MHz osc (PCLK pin)          ── 8 LEDs, 4 buttons, 4-DIP
-      ── I²C ── 24C02                   ── audio PWM L/R → RC → 3.5 mm jack
-      ── TMDS ×4 + DDC + HPD ── HDMI-A  ── 4 × PMOD (diff pairs)
-      ── LA header 2×5                  ── loopback jumper, test points
+USB-C #1 (5 V, FT2232H) ─┐                       ┌─ DDR3L x16 512 MB (banks 6+7, 1.35 V)
+PCIe slot 12 V ─ buck 5V ┼─ power OR ─ 5V_SYS ─┐ │
+                          │                     ├─ bucks/LDOs: 3V3 · 1V2 core · 1V35 DDR · 2V5 AUX · 1V2 SERDES (clean)
+FT2232H ── JTAG/UART ─────┴──────────── ECP5-5G LFE5UM5G-45F (CABGA381)
+                                          ├─ DCU0 CH0 ── PCIe x1 edge (REFCLK from slot)
+                                          ├─ DCU1 CH0 ── SFP cage          ┐ REFCLK_D1 ← 125 MHz osc
+                                          ├─ DCU1 CH1 ── SMA TX±/RX±       ┘
+                                          ├─ RGMII ── RTL8211F ── RJ45 magjack
+                                          ├─ ULPI ── USB3320 ── USB-C #2 (device/host)
+                                          ├─ SD ── microSD
+                                          ├─ TMDS ── HDMI · PWM ── audio jack
+                                          ├─ QSPI flash (bank 8) · I²C EEPROM (MAC)
+                                          └─ LEDs, buttons, DIP, 4 PMOD, LA header, TPs
 ```
 
-## 4. Power tree (to size in schematic gate A2)
+## 4. I/O budget (203 user I/O)
 
-| Rail | Source | Loads | Est. max | Notes |
-|---|---|---|---|---|
-| 5V_SYS | USB-C VBUS via protection | everything; HDMI 5 V (≤55 mA spec) | ~1.0 A | Input: TVS, PTC/eFuse, reverse-current block. USB default power (no PD) |
-| 3V3 | Buck from 5 V | VCCIO banks, FT2232H, flash, EEPROM, LEDs, PMODs (≤ 100 mA each) | ~1.0 A | Shunt + Kelvin TP (R16) |
-| 1V1 | Buck from 5 V (or 3.3 V) | ECP5 VCC core (+ 45F headroom) | ~1.0 A | FB divider checked worst-case with 1 % R: inside 1.1 V ± 5 % (lesson §5). Shunt + TP |
-| 2V5 | LDO from 3.3 V | ECP5 VCCAUX (+ any 2.5 V bank) | ~0.2 A | Shunt + TP |
-| FT 1V8 | FT2232H internal regulator | FT2232H core | — | Per FT2232H datasheet |
-
-Power sequencing per ECP5 datasheet (FPGA-DS-02012): verify that no sequencing is required, or that a power-good chain is needed. Ferrite beads are real beads, not 0 Ω (lesson §5).
-
-## 5. Bank-voltage plan (verified against the CABGA256 pinout)
-
-| Bank | VCCIO | Use |
+| Group | Pins | Bank / VCCIO |
 |---|---|---|
-| 0 | 3.3 V | clock, HDMI TMDS (LVCMOS33D) + DDC/HPD, audio, I²C |
-| 1 | 3.3 V | LEDs, buttons, DIP, UART, LA header, loopback, PLL test point |
-| 7 / 6 / 2 / 3 | 3.3 V | PMOD1 / PMOD2 / PMOD3 / PMOD4 (one PMOD per bank, A/B pairs) |
-| 8 | 3.3 V | Config: SPI flash (QSPI) |
+| DDR3L x16 (DQ16, DQS×2 pairs, DM×2, A0–A14, BA0–2, RAS/CAS/WE/CS/ODT/CKE/RESET, CK pair) | ≈ 49 | 6 + 7 @ 1.35 V (65 available) |
+| HDMI (4 TMDS pairs, DDC, HPD) | 11 | 0/1 @ 3.3 V |
+| RGMII + MDC/MDIO + reset/int | 16 | 3.3 V |
+| ULPI (DATA0–7, CLK, DIR, NXT, STP) + reset | 13 | 3.3 V |
+| microSD (CLK, CMD, DAT0–3, detect) | 7 | 3.3 V |
+| 4 × PMOD | 32 | 2/3 @ 3.3 V (L/R banks keep differential inputs) |
+| LEDs 8 · buttons 4 · DIP 4 | 16 | 3.3 V |
+| UART 4 · I²C 2 · audio 2 · clock 1 · loopback 2 · PLL TP 1 | 12 | 3.3 V |
+| LA header | 8 | 3.3 V |
+| PCIe sideband (PERST#, WAKE#, CLKREQ#) | 3 | 3.3 V |
+| SFP control (TX_DIS, LOS, MOD_ABS, RS) + SFP I²C | 6 | 3.3 V |
+| Flash QSPI extra (IO2/IO3) | 2 | 8 @ 3.3 V |
+| **Total** | **≈ 175** | 3.3 V side ≈ 126 of 138 (banks 0/1/2/3/8), DDR side 49 of 65 |
 
-Implemented in `hardware/latfun6/board/latfun6.json` (generated by `tools/gen_board.py`, validated against the Lattice CSV, place-and-route proven on 25k and 45k).
+Margin ≈ 12 I/O on 3.3 V banks; 16 unused 1.35 V balls in banks 6/7. If the pinout run gets tight, the LA header shrinks first (8 → 4).
 
-All user I/O are 3.3 V, fixed and silkscreened. R22 may change one bank to 2.5 V if true LVDS is promoted to S.
+## 5. Power tree (to size at Gate A2)
 
-## 6. I/O budget (LFE5U-25F CABGA256: 197 user I/O)
+| Rail | Source | Loads | Notes |
+|---|---|---|---|
+| 5V_SYS | USB-C #1 VBUS **or** 12 V slot → 5 V buck, through an ideal-diode / power mux | all regulators, HDMI 5 V, USB-C #2 VBUS (host mode, switched) | PCIe add-in card ≤ 10 W (low-profile); no back-feed |
+| 3V3 | buck (existing U2) | VCCIO 0/1/2/3/8, FT2232H, PHY, ULPI PHY, SFP (filtered), SD, flash, PMOD | current up from v0.1: ≈ 1.5 A budget; inductor/rating re-checked |
+| 1V2 | buck (existing U3, **FB changed for 1.2 V**) | ECP5-5G VCC core | FB sensed after shunt |
+| 1V2_SER | low-noise LDO or bead-filtered from 1V2 per TN-02038 Fig 3.1 | VCCA0/1, VCCHRX, VCCHTX | ≤ 0.25 % noise target for PLLs |
+| 2V5 | LDO (existing U4, may need more current) | VCCAUX, VCCAUXA0/1 (filtered) | |
+| 1V35 | new buck | DDR3L VDD/VDDQ, VCCIO 6/7 | VREF = 0.675 V divider (0.1 %), no VTT |
+| PHY internal | RTL8211F / USB3320 internal regulators | per their datasheets | A2 |
 
-| Group | Pins |
-|---|---|
-| Clock | 1 |
-| LEDs | 8 |
-| Buttons (user) | 4 |
-| DIP | 4 |
-| UART (TX/RX/RTS/CTS) | 4 |
-| Flash QSPI extra (IO2/IO3; CS/MOSI/MISO/CCLK are config pins) | 2 |
-| I²C | 2 |
-| Audio | 2 |
-| HDMI (8 TMDS + SCL/SDA + HPD) | 11 |
-| 4 × PMOD | 32 |
-| LA header | 8 |
-| Loopback | 2 |
-| **Total** | **80 user I/O + 4 config-shared flash pins** (~41 % of 197), leaving room for a 45F and a later GPIO header |
+Sequencing: VCCIO before or with VCC/VCCAUX (TN-02038 §4), DDR3L per JEDEC (VDD ramps with VDDQ).
 
-## 7. Physical and manufacturing targets
+## 6. Physical targets
 
-- PCB: **4 layers** (SIG / GND / PWR / SIG) as the target. CABGA256 is 0.8 mm pitch, which is standard (not class 3) at JLCPCB. Confirm via size/trace capability at layout; fall back to 6 layers only if fan-out or TMDS needs it.
-- Size target ~ 90 × 60 mm, all connectors on edges: USB-C, HDMI, audio on one long edge; PMODs on the opposite edge and ends.
-- Assembly: JLCPCB SMT, single-side top where possible. Parts from LCSC basic/preferred where possible. Every part passes the availability gate (pcb-fab-prep).
-- Silkscreen: pin names on every header, bank voltages, I²C address, TP names, licence + revision.
+- **PCIe x1 low-profile add-in card** (≤ 68.9 × 167.65 mm), bracket optional; also usable on the bench (USB-C power, rubber feet).
+- **6 layers** (SIG/GND/SIG/PWR/GND/SIG): BG381 0.8 mm escape, DDR3 point-to-point, 100 Ω SERDES/PCIe/HDMI pairs, 90 Ω USB, solid references.
+- Connectors: PCIe fingers on the bottom edge; bracket edge: SFP, RJ45, HDMI, USB-C #1/#2 (or USB on the opposite edge if the bracket gets crowded); SMA, PMODs, audio, LA header on the top/inner edges.
 
-## 8. Cost target (placeholder)
+## 7. Cost (estimate, qty 10)
 
-- Assembled board BOM + PCB + assembly at qty 10: **≤ US$ 45** target (FPGA + FT2232H dominate; to be priced at A2).
-- Student price goal: **well below the US$ 155 class**. Exact channel to decide (open item).
+FPGA ≈ $80 (consigned) · DDR3L ≈ $20 · FT2232H ≈ $13.5 · RTL8211F + magjack ≈ $4 · USB3320 ≈ $2 · SFP cage + SMA ≈ $5 · oscillators ≈ $3 · power ≈ $8 · passives/connectors ≈ $15 ⇒ **BOM ≈ $150**, plus 6-layer PCB + assembly. Target retail well under the ULX3S-85F class ($275) with far more capability.
 
-## 9. Verification hooks (summary)
+## 8. Re-baseline impact on the v0.1 schematic
 
-Test points (R15) · rail shunts (R16) · LA header (R14) · loopback (R17) · DONE/INITN visible · factory self-test (R19) · `board.json` single source (R21).
+Reused as placed: USB-C entry, FT2232H block, QSPI flash, user I/O (LEDs, buttons, DIP), I²C EEPROM, audio, 3V3 buck, 2V5 LDO, test-point plan.
+Changed: U5 (9-part BG256 symbol → BG381 UM5G symbol, more decoupling); U3 feedback 1.1 → 1.2 V; pinout regenerated against the ECP5-5G-45 CSV.
+New: SERDES block (refclk osc, AC caps, SFP cage, SMA, PCIe fingers, SERDES rails), DDR3L + 1V35 buck, RGMII PHY + magjack, ULPI PHY + USB-C #2, microSD, 12 V input + power mux.
 
-## 10. Verify-before-capture list (feeds pcb-schematic gate A2)
+## 9. Verify-before-capture
 
-1. ECP5 CABGA256 pinout: PCLK pins, differential pairs per bank, bank-8 config pins, VCCIO/VCCAUX/VCC ball map (FPGA-DS-02012, pinout CSV).
-2. Configuration per TN-02038 / FPGA-TN-02039: CFG pins, CCLK/CSSPIN pull-ups, PROGRAMN/INITN/DONE.
-3. LVDS / LVCMOS33D rules per sysIO TN (R22), TMDS on ECP5 at 3.3 V (pixel clock 25.175 MHz → 252 Mbit/s for 640×480).
-4. FT2232H reference design: VREGIN, EEPROM 93LC56, 12 MHz crystal, USB-C connection. `openFPGALoader` board-entry format (FTDI VID/PID, ch A JTAG).
-5. Buck/LDO choices on LCSC with FB math; USB-C protection part.
-6. LFE5U-25F and LFE5U-45F: same CABGA256 ball map and power pins (45F compatibility).
-7. HDMI DDC level shifter + 5 V current limit + ESD reference.
+1. LiteDRAM ECP5 DDR3 PHY pin rules (DQS groups, CK placement) → choose DDR3 balls with a place-and-route of a LiteX DDR3 SoC, not by hand.
+2. LitePCIe on ECP5-5G: open-flow support status for Gen1/Gen2 endpoint; reference designs.
+3. ECP5-5G SERDES power and REFCLK requirements (TN-02038 SERDES sections, SERDES/PCS usage guide): VCCA/VCCHRX/VCCHTX filtering, refclk standard and termination.
+4. RTL8211F and USB3320 reference designs (internal regulators, strap pins, clocking).
+5. PCIe CEM card rules: outline, finger plating/bevel, PRSNT pins, 12 V / 3.3 V budget.
+6. Power mux / ideal-diode part for USB-C vs 12 V slot.

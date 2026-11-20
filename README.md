@@ -1,21 +1,23 @@
 # LATFUN6: an open ECP5 textbook board
 
-An open-hardware **Lattice ECP5** board defined by the curriculum of the free, bilingual
+An open-hardware **Lattice ECP5-5G** application board defined by the curriculum of the free, bilingual
 [Open FPGA Tutorial](https://xiaojunyang0805.github.io/Free_FPGA_Tutorial/). Every on-board feature maps to a
 course lab, and verification is built in: test points, rail current shunts, a logic-analyser header, loopbacks,
 and a factory self-test.
 
-> Status: **v0.1, definition + schematic worknote (pre-capture).** Nothing has been fabricated yet. Codename only;
-> the public name is to be decided.
+> Status: **v0.2 definition (application board); schematic capture in progress in EasyEDA Pro.** Nothing has been
+> fabricated yet. Codename only; the public name is to be decided.
 
 ## At a glance
 
 | | |
 |---|---|
-| FPGA | LFE5U-25F, CABGA256 (placed: `-7BG256I`), ball-compatible with LFE5U-45F |
+| FPGA | **ECP5-5G LFE5UM5G-45F**, CABGA381 (85F-ready): 44k LUT, 4 × 5 Gb/s SERDES |
+| SERDES | SFP cage · 2 SMA pairs · PCIe x1 edge (low-profile add-in card) |
+| Memory | DDR3L x16 512 MB (Linux-class LiteX SoCs) · 128 Mbit QSPI flash · microSD |
+| Networking / USB | Gigabit Ethernet RJ45 (RTL8211F) · USB 2.0 ULPI PHY on a second USB-C |
 | Programming | one USB-C: power + FT2232H JTAG (ch A) + UART (ch B), `openFPGALoader` |
 | Clock | 25 MHz oscillator |
-| Config | 128 Mbit QSPI flash (W25Q128JV), user-accessible via `USRMCLK` |
 | Video / audio | HDMI (DVI) out, 3.5 mm audio (PWM/ΔΣ + RC) |
 | UI | 8 LEDs, 4 buttons (one deliberately un-debounced), 4-way DIP, I²C EEPROM |
 | Expansion | 4 × PMOD, each on its own bank with differential-capable pairs |
