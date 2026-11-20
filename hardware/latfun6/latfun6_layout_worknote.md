@@ -3,7 +3,7 @@
 **Project:** LATFUN6, open ECP5-5G application board
 **Board:** LATFUN6 rev v0.2. File `hardware/EDA/Latfun6.eprj`, PCB document `pcb1`.
 **Date started:** 2026-11-20
-**Status:** W2 placement v2 (with 4 mounting holes) written 2026-11-21; layout research on reference boards in progress
+**Status:** W2 placement v3 (CEM bracket holes, INF-8074 SFP datum, jack at rear) written 2026-11-21; next: user review, then W4/W5 stackup + BGA fan-out
 **Schematic worknote:** `latfun6_worknote.md` (gates A2 / C3 / C4 / D PASS, 2026-11-20)
 **EasyEDA Pro version:** V2.2.47.7
 
@@ -24,8 +24,8 @@ The low-profile outline in definition v0.2 (≤ 68.9 × 167.65 mm) does not fit:
 
 | rank | block / nets | what layout changes | the number |
 |---:|---|---|---|
-| 1 | **SERDES 5 Gb/s**: PCIE_HDTX/RX, SFP_HDTX/HDRX, SMA_HDTX/HDRX, REFCLK_D0/D1 (FPGA side and connector side) | impedance, intra-pair skew, vias, reference continuity, stubs | 100 Ω diff ±10 %; P/N skew ≤ 0.13 mm (5 mil); ≤ 2 vias per lane, each with an adjacent GND return via; no reference-plane split crossings; AC caps (C322/C323, C340–C343) 0402 at the connector end, pads voided on the plane below ✱; SFP and SMA routes kept short (< 60 mm target) |
-| 2 | **DDR3L x16** (U5 banks 6/7 ↔ U30), point-to-point, 1 chip | impedance, byte-lane matching, address/command group matching, VREF | 40 Ω SE / 80 Ω diff target (✱ per stackup); DQ/DM to own DQS within ±0.5 mm ✱ (ECP5 DDR3 guide TN-02035 to confirm); ADDR/CMD/CTL to CK within ±2.5 mm ✱; CK and DQS longer than their groups as the guide says ✱; all on one reference (GND); VREF dividers ≤ 5 mm from the balls, VREF track ≥ 0.5 mm from switching nets |
+| 1 | **SERDES 5 Gb/s** (TN-02038 4.2: continuous GND under the pairs, nothing above or below them; §15: ground via at every layer change; Versa: PCIe finger nets 85 Ω diff ✱ decide at W5): PCIE_HDTX/RX, SFP_HDTX/HDRX, SMA_HDTX/HDRX, REFCLK_D0/D1 (FPGA side and connector side) | impedance, intra-pair skew, vias, reference continuity, stubs | 100 Ω diff ±10 %; P/N skew ≤ 0.13 mm (5 mil); ≤ 2 vias per lane, each with an adjacent GND return via; no reference-plane split crossings; AC caps (C322/C323, C340–C343) 0402 at the connector end, pads voided on the plane below ✱; SFP and SMA routes kept short (< 60 mm target) |
+| 2 | **DDR3L x16** (U5 banks 6/7 ↔ U30), point-to-point, 1 chip | impedance, byte-lane matching, address/command group matching, VREF | **TN-02038 v2.1 §9:** 50 Ω SE (Versa schematic note); DQ/DM within ±50 mil (1.27 mm) of own DQS; DQS↔DQS_N and CK↔CK_N ±10 mil; LDQS↔UDQS ±100 mil; ADDR/CTRL↔CK ±100 mil; ≤ 3 vias FPGA→memory, matched per group; data groups on GND reference, unbroken; ADDR/CMD on a different layer from DQ/DQS/DM; 3W to unrelated nets, 2W between DDR traces; DQ swaps within a group allowed, never DQS. CK 100 Ω differential termination at the memory (TN-02035) ✱ schematic check; VREF dividers ≤ 5 mm from the balls |
 | 3 | **BG381 0.8 mm escape** (U5) and FBGA-96 0.8 mm (U30) | via size, track/space, layer count | dog-bone via 0.45 pad / 0.20 drill, 0.10/0.10 mm track/space inside the ball field (JLC 6-layer capability) ✱; outer two rings escape on Top, inner rings on L3 and Bottom |
 | 4 | **Switchers**: U22 LMR33630 (12 → 5 V 3 A), U3 TPS62827 (1V2 4 A), U2 TPS62826 (3V3 3 A), U24/U25 TLV62569 | input loop area, SW node area, FB routing | VIN ceramics ≤ 2 mm from VIN/PGND; SW copper minimal; FB taken at the load side and ≥ 3 mm from SW; solid GND under each, no signal on the layer beneath the SW node |
 | 5 | **1V2_SER / VCCAUXA analog supplies** | noise coupling | U26 and FB20 near U5's SERDES corner; 100 nF caps at the balls (bottom, under the BGA); not routed alongside switch nodes |
@@ -140,6 +140,36 @@ Draft, to confirm once J12's finger datum is known. Bracket edge = left (x = 0),
 - **Moves to make room:** PMODs shifted 4 mm down; U10/U11 and U20 moved off the keep-outs.
 - **Written:** backup `Latfun6.eprj.bak_placement_v2_holes_20261121-003151`. Re-check on the project: 0 pad pairs < 0.6 mm (holes included).
 - **Reference noted (user):** ALINX AX7020 (Zynq, 130 × 90 mm, 8 layers with dedicated power + GND layers, 4 corner holes, all I/O on the edges, DDR3 beside the SoC, regulators in one column along one side).
+
+### Reference research (2026-11-21, primary sources) and what changed
+
+**Sources:**
+- Lattice FPGA-TN-02038 v2.1 (hardware checklist), TN-02035 v1.3 (DDR3 I/O), TN-02024 v5.7 (BGA), TN-02077 (SERDES electrical); ECP5-5G Versa user guide EB-02048 v1.4.
+- PCIe CEM 2.0 Fig 6-1; SFP MSA INF-8074i Fig 4A.
+- KiCad files of ULX3S, ButterStick r1.0, Logicbone, ULX4M, OrangeCrab.
+- User reference: ALINX AX7020.
+- Full report kept in the session scratchpad. Key numbers are copied into §1 and below.
+
+**Adopted:**
+- **CEM bracket holes:** Ø3.18 mm at x 5.08 mm from the bracket end, y 5.05 mm from the top, 85.40 mm apart. Each has a component + trace keep-out, both sides, modelled as 12.7 × 10.1 mm. Plus the solder-side strip along the bracket edge (2.6 mm ✱ width read by eye). These are now **MH1/MH3** (user's left corner holes). MH2/MH4 stay in the right corners.
+- **Bracket window:** the connectors must fit between the bracket holes (y 10.4–85.0). The stack is HDMI J3 · USB-C J1 · SFP J14 · RJ45 J19 · USB-C J20, at ≈ 1.15 mm courtyard gaps. **The 12 V jack J11 moves to the rear edge** below the PMODs (bench power; in a PC the slot supplies 12 V). The 12 V OR (U20 group), 5 V buck U22, mux U23, 3V3 U2, 1V8 U25 and 2V5 U4 now run along the bottom right.
+- **SFP (INF-8074i Fig 4A):**
+  - J13 datum A sits 34.5 mm behind datum X (board edge).
+  - **Pin-1 row (pins 1–10) faces the front.** The earlier draft had it reversed (rot 90 → 270).
+  - The high-speed pins (TD± 18/19, RD± 13/12) are on the rear row, so traces enter from the rear.
+  - The cross-hatched cage area is a component **and trace** keep-out except chassis ground; traces are allowed under the connector body.
+- **CEM height limits:** 14.47 mm on the component side and 2.67 mm on the solder side. Only 0402/0603 decaps sit on the bottom.
+- **BGA:**
+  - Dog-bone 0.20/0.40 mm vias with 0.09–0.10 mm escapes fits JLC 6-layer: POFV filled/capped vias are the default at 6 layers and up, and via-in-pad is allowed.
+  - Lattice escaped a caBGA381 on 4 layers with 4 mil traces and 7 mil drills. ULX3S used 0.419/0.2 mm dog-bones on 4 layers; ButterStick used 0.4/0.2 mm via-in-pad on 8 layers.
+  - 0402 decaps under a caBGA381 are proven (ButterStick: 39). Lattice prefers 0201 for 100 nF.
+
+**Follow-ups for the schematic (not changed yet, ✱ decide):**
+1. SFP cage pins must go to **chassis ground, not circuit GND** (INF-8074i). Check J14's net mapping; add a chassis net with an RC/bead tie if wanted.
+2. TN-02038 Table 3.1 asks for a **120 Ω bead + 10 µF + 100 nF per pin** on each of VCCAUX, VCCA, VCCHRX, VCCHTX, VCCAUXA. We have beads on VCCAUX (FB2) and VCCAUXA (FB20). VCCA, VCCHRX and VCCHTX all share 1V2_SER without separate beads.
+3. TN-02035 recommends ADDR/CMD 50 Ω to VTT after the memory. We have no VTT (point-to-point, single chip): keep as decided, or add VTT.
+
+**Written:** backup `Latfun6.eprj.bak_placement_v3_cem_20261121-004236`. Re-check on the project: 0 pad pairs < 0.6 mm (holes included); 0 parts in the bracket keep-outs.
 
 ## Section 5 — Net classes and widths (from §1 only)
 

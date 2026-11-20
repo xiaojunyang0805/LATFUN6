@@ -49,15 +49,15 @@ def put_edge(d, rot, edge, along, over=0.0, side=1, which='crt'):
 # main board edge at footprint y = +4.95 mm (tab tip at -3.45 mm): origin visual y = H + 4.95.
 put('J12', 57.15 - 452.76 * MIL, H + 194.88 * MIL, 0, 1)
 # bracket column, top -> bottom
-put_edge('J3', 270, 'L', 10.5, over=1.0)            # HDMI
-put_edge('J1', 270, 'L', 25.5, over=1.0)            # USB-C #1 (FT2232H)
+put_edge('J3', 270, 'L', 18.5, over=1.0)            # HDMI (bracket window y 10.4-85.0 between CEM holes)
+put_edge('J1', 270, 'L', 32.55, over=1.0)           # USB-C #1 (FT2232H)
 # SFP cage: board edge at footprint x = -23.05 mm (outline mark in the footprint), opening to the bracket
-put('J14', 23.05, 42.5, 0, 1)
-put_edge('J19', 90, 'L', 62.0, over=2.0)            # RJ45
+put('J14', 23.05, 47.1, 0, 1)
+put_edge('J19', 90, 'L', 65.15, over=2.0)           # RJ45
 put_edge('J20', 270, 'L', 80.0, over=1.0)           # USB-C #2 (ULPI)
-put_edge('J11', 0, 'L', 93.5, over=0.5)             # 12 V jack
+put_edge('J11', 180, 'R', 86.0, over=0.5)           # 12 V jack: rear edge (bracket window full), next to the power chain
 # SFP host connector inside the cage, rear half (verify against TE 2227302-1 drawing)
-put('J13', 23.05 + 8.5, 42.5, 90, 1)
+put('J13', 34.5, 47.1, 270, 1)   # INF-8074i Fig 4A: connector datum A 34.5 mm behind datum X (board edge); pin-1 row toward the front
 # FPGA and DDR3
 put('U5', 76.0, 51.0, 270, 1)
 put('U30', 76.0, 24.0, 90, 1)
@@ -82,13 +82,13 @@ put('U12', 27.0, 4.0, 0, 1); put('U13', 27.0, 15.0, 0, 1)
 put('U31', 33.0, 62.0, 0, 1)
 put('U32', 30.0, 80.0, 0, 1)
 # power: 12 V entry near jack + slot 12 V pins, bucks bottom right; core buck near U5
-put('U20', 27.0, 91.0, 0, 1); put('U21', 38.0, 95.0, 0, 1)
-put('U22', 100.0, 92.0, 0, 1); put('U23', 116.0, 92.0, 0, 1)
-put('U2', 130.0, 92.0, 0, 1)                         # 3V3
+put('U20', 150.0, 91.0, 0, 1); put('U21', 38.0, 95.0, 0, 1)
+put('U22', 132.0, 91.0, 0, 1); put('U23', 118.0, 91.0, 0, 1)
+put('U2', 104.0, 91.0, 0, 1)                         # 3V3
 put('U3', 94.0, 66.0, 0, 1)                          # 1V2 core, near U5
 put('U24', 96.0, 22.0, 0, 1)                         # 1V35 near DDR3
-put('U25', 143.0, 92.0, 0, 1)                        # 1V8
-put('U4', 156.0, 92.0, 0, 1)                         # 2V5
+put('U25', 90.0, 93.0, 0, 1)                         # 1V8
+put('U4', 86.0, 81.0, 0, 1)                          # 2V5
 # user I/O (right of U5), top-edge connectors
 put('U9', 106.0, 40.0, 0, 1)                         # EEPROM
 put('R100', 108.0, 52.0, 0, 1)                       # LED array anchor
@@ -99,7 +99,7 @@ put('R140', 140.0, 18.0, 0, 1)                       # audio filter anchor
 put_edge('J21', 180, 'T', 86.0, over=0.0)            # microSD at the top edge (card in from the top)
 put('J9', 131.0, 22.0, 0, 1); put('J10', 142.0, 22.0, 0, 1)   # LA header + loopback
 for i, d in enumerate(['J5', 'J6', 'J7', 'J8']):    # PMODs, rear edge, facing out
-    put_edge(d, 90, 'R', 18.5 + i * 17.5, over=0.0)
+    put_edge(d, 90, 'R', 18.0 + i * 17.0, over=0.0)
 put('TP1', 125.0, 40.0, 0, 1)                        # test-point field anchor
 # PCIe TX AC caps in the corridor right above the B14/B15 fingers (x = J12 origin + 15 / 16 mm)
 jx = plan['J12'][0]
@@ -158,7 +158,10 @@ KEEP[2] += [field('U5', 1.7), field('U30', 1.7)]          # bottom: inner ball f
 CORR = [(57.5, 52.0, 65.8, 101.5), (49.8, 43.0, 67.2, 58.8), (50.5, 4.5, 57.0, 43.0)]
 KEEP[1] += CORR
 # 4 x M3 mounting holes (plated, GND, 6.0 mm pad): keep-out radius 4.3 mm on both sides
-HOLES = [(19.5, 4.5), (W - 4.0, 4.0), (19.5, H - 4.5), (W - 4.0, H - 4.0)]
+HOLES = [(5.08, 5.05), (W - 4.0, 4.0), (5.08, 5.05 + 85.40), (W - 4.0, H - 4.0)]   # left pair = CEM 2.0 Fig 6-1 bracket holes
+# CEM bracket-hole keep-outs (component + trace, both sides) and the solder-side strip along the bracket edge
+for s_ in (1, 2): KEEP[s_] += [(0, 0, 12.7, 10.1), (0, 85.35, 12.7, H)]
+KEEP[2].append((0, 0, 2.6, H))
 for hx, hy in HOLES:
     for s_ in (1, 2): KEEP[s_].append((hx - 4.3, hy - 4.3, hx + 4.3, hy + 4.3))
 json.dump(HOLES, open('holes.json', 'w'))
