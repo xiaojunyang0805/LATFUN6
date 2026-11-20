@@ -3,7 +3,7 @@
 **Project:** LATFUN6, open ECP5-5G application board
 **Board:** LATFUN6 rev v0.2. File `hardware/EDA/Latfun6.eprj`, PCB document `pcb1`.
 **Date started:** 2026-11-20
-**Status:** W2 v4 passive tidy written 2026-11-21; compaction (shorter card, ALINX-style regulator cells) proposed
+**Status:** W2 v5 written 2026-11-21: card shortened to 145.65 mm (user choice), right region re-planned; next: user review, then W4/W5 stackup + BGA fan-out
 **Schematic worknote:** `latfun6_worknote.md` (gates A2 / C3 / C4 / D PASS, 2026-11-20)
 **EasyEDA Pro version:** V2.2.47.7
 
@@ -200,6 +200,23 @@ Draft, to confirm once J12's finger datum is known. Bracket edge = left (x = 0),
   - User keys in a row along one edge, with labelled LEDs above them.
   - DDR3 tight against the SoC.
   - All connectors on edges; 4 corner holes.
+
+### v5: compact card, 145.65 × 102.75 mm (user choice 2026-11-21, ≈ 22 mm shorter)
+
+`tools/layout/mkovr.py` holds the re-planned right region; `tidy.py` re-places the passives.
+
+**Re-planned right region:**
+- **Rear edge:** PMODs J5–J8 at a 16.35 mm pitch (courtyard gap 0.35 mm, bodies ≈ 1 mm apart) from y 14.6. The 12 V jack J11 sits below them, raised to clear MH4. MH2/MH4 stay 4 mm from the right corners.
+- **Top strip, ALINX-style:** microSD J21 · the user's button cluster (unchanged) · DIP SW6 under the buttons · LA header J9 upright, with J10 · audio jack J4 in the top-right corner. Below them: test points TP1–12 in a 4 × 3 grid, and the LED row D10–D17 with resistors under each.
+- **Power row along the bottom edge, left to right:** 2V5 U4 · 1V8 U25/L22 · 3V3 U2/L1/RS1 · 5 V mux U23 · 5 V buck U22/L20 · 12 V jack OR U20/Q20/Q22/D4/F2 beside the jack. The 1V2 core (U3/L2) and 1V35 (U24/L21) stay next to U5/U30.
+
+**Checks:**
+- Outline 145.65 mm (bracket holes and finger tab unchanged).
+- 0 pad pairs < 0.6 mm on the project (exact shapes; J11 ↔ MH4 clear at ≥ 0.6 mm).
+- Fixed-part overlaps 0 (`ovl.py`).
+- Backup `Latfun6.eprj.bak_compact_v5_145mm_20261121-005625`.
+
+**Proposal (schematic, not done):** a labelled rail test point per regulator cell (1V2, 1V35, 1V8, 3V3, 2V5, 5V, 1V2_SER), as on the ALINX board.
 
 ## Section 5 — Net classes and widths (from §1 only)
 

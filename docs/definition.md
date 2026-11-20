@@ -100,7 +100,7 @@ Sequencing: VCCIO before or with VCC/VCCAUX (TN-02038 §4), DDR3L per JEDEC (VDD
 
 ## 6. Physical targets
 
-- **PCIe x4 full-height add-in card** (≈ 111.15 × 167.65 mm, full height × half length; x4 finger length, only lane 0 wired), bracket optional; also usable on the bench (12 V jack or USB-C power, rubber feet). **Changed 2026-11-20 from low-profile:** the five bracket connectors need ≈ 89 mm of a 68.9 mm low-profile edge, and the 450 parts' courtyards (≈ 9,400 mm²) would fill > 80 % of one low-profile side before routing (see `hardware/latfun6/latfun6_layout_worknote.md`).
+- **PCIe x4 full-height add-in card** (111.15 mm high incl. fingers × **145.65 mm** long since 2026-11-21, inside the 167.65 mm half-length limit; x4 finger length, only lane 0 wired), bracket optional; also usable on the bench (12 V jack or USB-C power, rubber feet). **Changed 2026-11-20 from low-profile:** the five bracket connectors need ≈ 89 mm of a 68.9 mm low-profile edge, and the 450 parts' courtyards (≈ 9,400 mm²) would fill > 80 % of one low-profile side before routing (see `hardware/latfun6/latfun6_layout_worknote.md`).
 - **6 layers** (SIG/GND/SIG/PWR/GND/SIG): BG381 0.8 mm escape, DDR3 point-to-point, 100 Ω SERDES/PCIe/HDMI pairs, 90 Ω USB, solid references.
 - Connectors: PCIe fingers on the bottom edge; bracket edge: SFP, RJ45, HDMI, USB-C #1/#2 (or USB on the opposite edge if the bracket gets crowded); SMA, PMODs, audio, LA header on the top/inner edges.
 

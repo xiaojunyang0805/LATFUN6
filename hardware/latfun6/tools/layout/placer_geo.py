@@ -3,7 +3,7 @@ sys.path.insert(0, __import__('os').environ.get('PCB_LAYOUT_SCRIPTS', ''))
 from eprj_core import Board
 B = Board(__import__('os').environ.get('EPRJ', 'hardware/EDA/Latfun6.eprj'))
 MIL = 0.0254
-W, H = 167.65, 102.75
+W, H = float(__import__('os').environ.get('BOARD_W', '167.65')), 102.75
 G = json.load(open('fpgeo.json'))
 # ---------------- geometry helpers ----------------
 TH = set()

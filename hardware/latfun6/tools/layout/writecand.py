@@ -2,7 +2,7 @@
 import json, math, sys, shutil
 sys.path.insert(0, __import__('os').environ.get('PCB_LAYOUT_SCRIPTS', ''))
 import eprj_core as ec
-MIL = 0.0254; W, H = 167.65, 102.75
+MIL = 0.0254; W, H = float(__import__('os').environ.get('BOARD_W', '167.65')), 102.75
 SRC = __import__('os').environ.get('EPRJ', 'hardware/EDA/Latfun6.eprj')
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'cand.eprj'
 plan = json.load(open('plan.json'))

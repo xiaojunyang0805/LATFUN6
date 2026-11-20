@@ -16,6 +16,11 @@ if DELTA:
     for d, p in cur.items():
         if p[0] > X0 and not re.match(r'^(R|C|FB)\d', d): p[0] -= DELTA
     HOLES = [(hx - DELTA if hx > X0 else hx, hy) for hx, hy in HOLES]
+if os.path.exists(os.environ.get('OVR', '__none__')):
+    _o = json.load(open(os.environ['OVR']))
+    W = _o['W']
+    for d, p in _o['O'].items(): cur[d] = list(p)
+    HOLES = [tuple(h) for h in _o['HOLES']]
 PASSIVE = lambda d: re.match(r'^(R|C|FB)\d', d) is not None
 LEDS = ['D%d' % i for i in range(10, 18)]
 moveable = {d for d in cur if PASSIVE(d)} | set(LEDS)
