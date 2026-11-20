@@ -101,8 +101,8 @@ The second architecture feeds the 1V2/1V35/1V8 bucks from the slot's 3.3 V pins 
 
 | Rail | W (45F) | W85 | Regulator (was → now) | Rating | Margin vs W85 |
 |---|---|---|---|---|---|
-| 1V2 core | 1.45 A | 2.75 A | TLV62569 2 A → **4 A-class buck** (TPS62827-class, verify at A2) | 4 A | 1.45× |
-| 3V3 | 1.56 A | 1.56 A | TLV62569 2 A (U2) → **3 A-class buck** (TPS62826 / TLV62585-class) | 3 A | 1.9× |
+| 1V2 core | 1.45 A | 2.75 A | TLV62569 2 A → **TPS62827 4 A** | 4 A | 1.45× |
+| 3V3 | 1.56 A | 1.56 A | TLV62569 2 A (U2) → **TPS62826 3 A** | 3 A | 1.9× |
 | 1V35 | 0.45 A | 0.45 A | TLV62569 | 2 A | 4.4× |
 | 1V8 | 0.37 A | 0.37 A | TLV62569 (new) | 2 A | 5.4× |
 | 1V2_SER | 0.34 A | 0.34 A | TPS7A91 LDO from 1V8 (0.2 W) | 1 A | 2.9× |
@@ -112,6 +112,6 @@ The second architecture feeds the 1V2/1V35/1V8 bucks from the slot's 3.3 V pins 
 
 ## Power-entry decision (2026-11-20): x4 low-profile edge + 12 V DC jack (user chose option 1)
 
-- **Chosen: x4 low-profile edge (lane 0 wired) + optional 12 V DC jack for the bench.** The 25 W slot budget covers every scenario including W85, at 13.6 W, which is 54 % of the limit. The supply stays simple: 12 V only, with no 3.3 V split. The jack gives a clean bench supply independent of USB, and is ORed with the slot 12 V through a second TPS2121, which handles up to 22 V. Cost ≈ +$2 and 14 mm more finger length. The board then no longer fits closed-end x1 slots.
+- **Chosen: x4 low-profile edge (lane 0 wired) + optional 12 V DC jack for the bench.** The 25 W slot budget covers every scenario including W85, at 13.6 W, which is 54 % of the limit. The supply stays simple: 12 V only, with no 3.3 V split. The jack gives a clean bench supply independent of USB, and is ORed with the slot 12 V through two LM74700-Q1 ideal diodes (TPS2121 rejected at 12 V: 24 V abs max, see definition.md §11). Cost ≈ +$2 and 14 mm more finger length. The board then no longer fits closed-end x1 slots.
 - *Rejected:* stay x1 low-profile at 10 W. This adds the 3.3 V split above (≈ +$1.5). Typical stays at ≈ 5.0 W, 50 % of the limit. Slot mode then needs a documented envelope of ≤ 8 W total, which excludes class-II/copper SFPs, USB host VBUS, more than 50 mA of PMOD loads and very full fabric designs. Heavy designs and the 85F become bench-only.
 - Either way: **USB-C #1 needs a 5 V / 3 A adapter** for anything beyond light designs. A PC port is enough for programming a light design only. *Optional:* route the CC-pin voltage to the FPGA through a comparator, so gateware can detect the source's current capability.

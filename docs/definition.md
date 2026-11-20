@@ -37,7 +37,7 @@ Supply check (2026-11-20): DigiKey LFE5UM5G-45F-8BG381C **44 pcs, $78.21**; -8BG
 | R28 | **microSD** | Linux rootfs, data logging, SD-mode and SPI labs | 4-bit SD + detect, 3.3 V | M |
 | R29 | **USB 2.0 ULPI PHY** + second USB-C (device/host) | LiteX USB, Linux gadget/host, USB protocol labs | USB3320-class, 12-pin ULPI at 3.3 V, 60 MHz from PHY; VBUS switch for host mode | M |
 | R30 | SERDES reference clock | SFP/SMA lanes | **I²C-programmable low-jitter clock generator** (LVDS, from crystal) → REFCLK_D1: 125 MHz (1.25/2.5 G), 250 MHz (5 G, 20×), 156.25 MHz etc. A fixed 125 MHz osc caps the lanes at 3.125 Gb/s (25× max). Shares the EEPROM I²C bus; no new FPGA pins | M |
-| R31 | Triple power entry | PCIe slot, bench 12 V jack, or USB-C | **12 V side:** slot 12 V and a **5.5/2.1 mm 12 V DC jack** (centre +, TVS + reverse-polarity protection) ORed by TPS2121 #1 (jack priority, no back-feed into the slot); → LMR33630 5 V 3 A. **5 V side:** 12 V-derived 5 V and USB-C #1 VBUS ORed by TPS2121 #2 (12 V path priority) → 5V_SYS. Budget in [power_budget.md](power_budget.md): typical 5.2 W, worst 11.4 W (45F) / 13.6 W (85F), all inside the **25 W x4 slot limit** (decision 2026-11-20). USB-C alone needs a 5 V / 3 A adapter for heavy designs. Regulators sized ≥ 1.3× W85 (core 4 A-class, 3V3 3 A-class) | M |
+| R31 | Triple power entry | PCIe slot, bench 12 V jack, or USB-C | **12 V side:** slot 12 V and a **5.5/2.1 mm 12 V DC jack** (centre +, TVS + reverse-polarity protection) ORed by 2 × LM74700-Q1 ideal diodes (jack priority via slot-EN; TPS2121 rejected at 12 V, see §11); → LMR33630 5 V 3 A. **5 V side:** 12 V-derived 5 V and USB-C #1 VBUS ORed by TPS2121 #2 (12 V path priority) → 5V_SYS. Budget in [power_budget.md](power_budget.md): typical 5.2 W, worst 11.4 W (45F) / 13.6 W (85F), all inside the **25 W x4 slot limit** (decision 2026-11-20). USB-C alone needs a 5 V / 3 A adapter for heavy designs. Regulators sized ≥ 1.3× W85 (core 4 A-class, 3V3 3 A-class) | M |
 | R32 | DCU0 CH1 (4th lane) | spare | AC-cap pads + test points, or second SMA pair (decide at layout) | C |
 | X1 | ~~SDRAM~~ | now covered by R26 | | — |
 | X2 | ~~SERDES out~~ | now R23–R25 | | — |
@@ -87,7 +87,7 @@ Margin ≈ 12 I/O on 3.3 V banks; 16 unused 1.35 V balls in banks 6/7. If the pi
 
 | Rail | Source | Loads | Notes |
 |---|---|---|---|
-| 5V_SYS | (slot 12 V ∥ 12 V jack → TPS2121 #1) → LMR33630 5 V, ORed with USB-C #1 VBUS by TPS2121 #2 (12 V path priority) | all regulators, HDMI 5 V, USB-C #2 VBUS (host mode, switched) | worst 2.44 A (85F); TPS2121 limit ≈ 3.5 A; x4 slot 25 W |
+| 5V_SYS | (slot 12 V ∥ 12 V jack → 2 × LM74700-Q1) → LMR33630 5 V, ORed with USB-C #1 VBUS by TPS2121 (12 V path priority) | all regulators, HDMI 5 V, USB-C #2 VBUS (host mode, switched) | worst 2.44 A (85F); TPS2121 limit ≈ 3.5 A; x4 slot 25 W |
 | 3V3 | buck (existing U2) | VCCIO 0/1/2/3/8, FT2232H, PHY, ULPI PHY, SFP (filtered), SD, flash, PMOD | current up from v0.1: ≈ 1.5 A budget; inductor/rating re-checked |
 | 1V2 | buck (existing U3, **FB changed for 1.2 V**) | ECP5-5G VCC core | FB sensed after shunt |
 | 1V2_SER | **dedicated low-noise LDO** (TPS7A91-class, from 3V3) | VCCA0/1 (±3 %), VCCHTX ×4 / VCCHRX ×4 via 120 Ω beads | must not share VCC core (DS Tab 3.2 note 2, TN-02038 Tab 16.1); ≈ 150 mA per DCU at 5 G; each pin 10 µF + 100 nF |
@@ -106,7 +106,7 @@ Sequencing: VCCIO before or with VCC/VCCAUX (TN-02038 §4), DDR3L per JEDEC (VDD
 
 ## 7. Cost (estimate, qty 10)
 
-FPGA ≈ $80 (consigned) · DDR3L ≈ $20 · FT2232H ≈ $13.5 · RTL8211F + magjack ≈ $4 · USB3320 ≈ $2 · SFP cage + SMA ≈ $5 · clock generators ≈ $8 · power ≈ $11 (2 × TPS2121, 12 V jack) · passives/connectors ≈ $15 ⇒ **BOM ≈ $150**, plus 6-layer PCB + assembly. Target retail well under the ULX3S-85F class ($275) with far more capability.
+FPGA ≈ $80 (consigned) · DDR3L ≈ $20 · FT2232H ≈ $13.5 · RTL8211F + magjack ≈ $4 · USB3320 ≈ $2 · SFP cage + SMA ≈ $5 · clock generators ≈ $8 · power ≈ $12 (TPS2121, 2 × LM74700 + FETs, 12 V jack) · passives/connectors ≈ $15 ⇒ **BOM ≈ $150**, plus 6-layer PCB + assembly. Target retail well under the ULX3S-85F class ($275) with far more capability.
 
 ## 8. Re-baseline impact on the v0.1 schematic
 
@@ -138,7 +138,7 @@ Primary sources: Lattice FPGA-DS-02012 v3.4 [DS], FPGA-TN-02038 v2.1 [CL], FPGA-
 **RTL8211F(I)-VD** (40-QFN; -CG is the older 1.0 V-core silicon, same pinout)
 - Straps (4.7 kΩ, never direct): PHYAD = 001 (RXD3 up, RXC down, RXCTL down); PLLOFF down; **TXDLY up, RXDLY up** (PHY adds both 2 ns delays, so ecp5rgmii runs with no FPGA delay); **CFG_EXT up, CFG_LDO1:0 = 00 ⇒ 3.3 V RGMII** (power-on default is 2.5 V).
 - LED0 active-low, LED1/LED2 active-high (polarity follows the strap). MDIO 1.5 kΩ pull-up. PHYRSTB from the FPGA with a pull-down (≥ 10 ms low, 72 ms before MDIO). 25 MHz crystal, ESR ≤ 50 Ω.
-- RSET value is not in the datasheet text: get it from the Realtek reference schematic before capture (third-party value 2.49 kΩ, unverified).
+- (§11: RSET is pin 39, 2.49 kΩ.) RSET value is not in the datasheet text: get it from the Realtek reference schematic before capture (third-party value 2.49 kΩ, unverified).
 - Magjack **HR911130C**: 1000BASE-T, 1CT:1CT, Bob Smith termination inside. Centre taps (P1) to GND through 100 nF (voltage-mode PHY; confirm against the Realtek reference).
 
 **USB3320C-EZK**
@@ -163,4 +163,39 @@ Primary sources: Lattice FPGA-DS-02012 v3.4 [DS], FPGA-TN-02038 v2.1 [CL], FPGA-
 
 **SMA:** Molex 73251-1150 edge-launch, 18 GHz, LCSC C841205 (1.6 mm board; 73251-1290 for 0.062").
 
-**Open items for A2:** ×2 PCIe refclk multiplier part (must track slot SSC; candidates to check: Renesas 5P49V6965, TI CDCE6214, Skyworks Si5332); DCU1 clock-generator part; RTL8211F RSET and inductor values from the Realtek reference; SFP connector source; SFP TX_FAULT has no FPGA pin yet (read via pull-up only, or take one spare I/O).
+**Open items for A2** (most resolved in §11): ×2 PCIe refclk multiplier part (must track slot SSC; candidates to check: Renesas 5P49V6965, TI CDCE6214, Skyworks Si5332); DCU1 clock-generator part; RTL8211F RSET and inductor values from the Realtek reference; SFP connector source; SFP TX_FAULT has no FPGA pin yet (read via pull-up only, or take one spare I/O).
+
+## 11. Part selection (2026-11-20)
+
+Datasheets: TI SNAS811A (CDCE6214), SLVSEA3F (TPS2121), SNOSD17G (LM74700-Q1), SLVSEF9I (TPS6282x), SBVS282A (TPS7A91), SLVSDG1C (TLV62569); Realtek RTL8211F(I)-VD Rev 1.0; Same Sky PJ-002AH-SMT. LCSC numbers come from the EasyEDA library. **Stock is re-checked at S3 / F2.**
+
+| Function | Part | LCSC | Notes |
+|---|---|---|---|
+| PCIe refclk ×2 (slot 100 → 200 MHz) | **TI CDCE6214** #1 | C3608351 | 1 PLL, integer mode 2400 MHz /12, loop BW 100 k–1.6 MHz, so it tracks 0.5 % SSC (§7.3). PRIREF ← slot HCSL (AC-coupled); SECREF ← 100 MHz LVCMOS osc (bench). EEPROM pages selected by HW_SW_CTRL, so it **boots without the FPGA**. I²C 0x68 |
+| DCU1 refclk (SFP/SMA) | **TI CDCE6214** #2 | C3608351 | 25 MHz crystal; 125/156.25/250 MHz (VCO 2500) or 200 MHz (VCO 2400), one at a time, integer mode ≤ 600 fs. I²C 0x69 (EEPROM LSB). Alternate part: Renesas 5P49V6965 (ships blank; vendor ownership is changing) |
+| ~~ispClock5406D~~ | — | — | obsolete, not usable |
+| 12 V OR (slot ∥ jack) | **2 × LM74700-Q1** + CSD17575Q3 30 V FETs | C2941042 / C529277 | Survives −65 V reverse and blocks in < 0.75 µs. **TPS2121 rejected for 12 V**: abs max 24 V is below the SMBJ15A clamp (24.4 V), and it does not tolerate reverse polarity. **Jack priority:** a jack-present signal pulls the slot LM74700's EN low |
+| Jack protection | 0466003.NR 3 A fuse + **SMBJ15A** TVS | C99555 / C232769 | 15 V standoff > 13.2 V (12 V +10 %); 24.4 V clamp is inside the LM74700, FET and LMR33630 (36 V) ratings |
+| 12 V DC jack | **Same Sky PJ-002AH-SMT-TR** | C22434687 | 5 A, 24 V, SMT right-angle, ≈ 11 mm high, at the bracket edge (bracket cut-out). Its 2.0 mm pin fits a 2.1 mm plug loosely: check with real plugs |
+| 12 → 5 V | LMR33630 | — | 3.8–36 V in, 3 A |
+| 5 V OR (12 V-derived ∥ USB-C) | TPS2121RUXR | C485916 | 12 V path priority via PR1 |
+| 1V2 core | **TPS62827DMQR** (4 A) | C2071448 | 2.4–5.5 V in, 2.2 MHz, 1.5 × 1.5 mm, 470 nH, adjustable. Replaces U3 TLV62569 |
+| 3V3 | **TPS62826DMQR** (3 A) | C2073319 | same family. Replaces U2 TLV62569. Alternate: TLV62585 C406872 |
+| 1V35 DDR3L | TLV62569DBVR | C141836 | 2 A |
+| 1V8 | TLV62569DBVR | C141836 | 2 A; feeds 1V2_SER and USB3320 VDD18 |
+| 1V2_SER | **TPS7A9101DSKR** | C2878140 | 1.8 → 1.2 V at 0.35 A (≈ 100 mV dropout at that load vs 600 mV available) |
+| SFP connector | **TE 1888247-1** (SMT, 20-pin, 16 Gb/s) | C305914 | replaces 1367073-1 (unavailable). Same MSA footprint; check against drawing ENG_CD_1888247 |
+| SFP cage | TE 2227302-1 (press-fit) | C589577 | recommended board thickness 1.5 mm vs our 1.57 mm: check the press-fit range. Alternate set: Molex 74441-0010 (C277674) + 74737-0009 |
+| SMA | Molex 73251-1150 | C841205 | edge launch |
+| RTL8211F passives | RSET **pin 39** = 2.49 kΩ 1 %; REG_OUT **pin 30** → 2.2 µH → 0.9 V, ≥ 4.7 µF + 100 nF per pin | — | RSET from a published RTL8211F board schematic (ROCKPro64 v2.1 p.24). Pin numbers corrected from §10 |
+
+**PCIe x4 edge (secondary source, Wikipedia pinout table):**
+- A1 PRSNT1# is tied to **B31** PRSNT2#; B17 is left open.
+- Lanes 1–3 (B19/20, A21/22, B23/24, A25/26, B27/28, A29/30) are not connected.
+- B21, B22, B25, B26, B29, B32, A20, A23, A24, A27, A28 and A31 are GND.
+- A19, A32 and B30 (PWRBRK#) are not connected.
+
+**Still to verify:**
+- CDCE6214 output common-mode against the ECP5 REFCLK input range (0–1.6 V).
+- CDCE6214 jitter with an SSC input, which needs a measurement.
+- CEM component-height limit on the component side (≈ 14.47 mm, unverified).
