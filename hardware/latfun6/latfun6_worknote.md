@@ -44,6 +44,15 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **B1 laid out in clusters and wired (S4), 2026-11-20.**
+> - **Layout:** 11 functional clusters (12 V jack, slot, 5 V buck, 5 V mux, USB-C #1, 3V3, 1V2, 2V5+LED, 1V35, 1V8, 1V2_SER), arranged in signal-flow rows. Every R/C/L/shunt/diode is horizontal, next to the IC pin it connects to. User: "put them in clusters, for people reading easily".
+> - **Wiring:** 256 net stubs on 51 nets from `tools/schematic/netmap_b1.py`. Saved-file check: every stub lands on exactly one pin, with the planned net (0 mismatches).
+> - **Intentional no-connects:** PG pins of U22, U2, U3 and U26; U4 NC; J1 SBU1/SBU2. Whether PG goes to a test point is decided at A2.
+> - **Nets that close in other blocks:** 2V5 → B3; PWR_ST → TP12 (B11); 12V_SLOT → J12 (B7); USB_DP/USB_DN → B4.
+> - **Rail renamed 1V1 → 1V2** (TPS62827 at 1.200 V). The Section 1 power table still says 1V1, fix at C4.
+> - **Rotation:** 30 passives sit at 180° instead of 0°. The extension ignores a rotation of 0; this is cosmetic, since connections are by net name.
+> - **⚠ Incident:** the v1.0.3 move tool blanked Value, LCSC and Supplier Part on 406 parts. Repaired from the device records (v1.0.6 `sch_restore_attrs_by_device`); `attrcheck.py` now clean.
+
 > **B5 audio placed (2026-11-20), gge13001–13011.** Placed in the reserved strip at the bottom of B5 (y < 360).
 > - J4 PJ-313D 3.5 mm TRS jack (C668608) at (2700,210).
 > - **Left channel (y 290):** R140 1 k (C11702) → C140 10 nF (C15195) → R141 1 k → C141 10 nF → C142 10 µF (C19702) to the jack tip.
