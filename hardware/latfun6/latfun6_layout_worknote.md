@@ -3,7 +3,7 @@
 **Project:** LATFUN6, open ECP5-5G application board
 **Board:** LATFUN6 rev v0.2. File `hardware/EDA/Latfun6.eprj`, PCB document `pcb1`.
 **Date started:** 2026-11-20
-**Status:** W2 placement v3 (CEM bracket holes, INF-8074 SFP datum, jack at rear) written 2026-11-21; next: user review, then W4/W5 stackup + BGA fan-out
+**Status:** W2 v4 passive tidy written 2026-11-21; compaction (shorter card, ALINX-style regulator cells) proposed
 **Schematic worknote:** `latfun6_worknote.md` (gates A2 / C3 / C4 / D PASS, 2026-11-20)
 **EasyEDA Pro version:** V2.2.47.7
 
@@ -170,6 +170,36 @@ Draft, to confirm once J12's finger datum is known. Bracket edge = left (x = 0),
 3. TN-02035 recommends ADDR/CMD 50 Ω to VTT after the memory. We have no VTT (point-to-point, single chip): keep as decided, or add VTT.
 
 **Written:** backup `Latfun6.eprj.bak_placement_v3_cem_20261121-004236`. Re-check on the project: 0 pad pairs < 0.6 mm (holes included); 0 parts in the bracket keep-outs.
+
+### v4: passive tidy (user request 2026-11-21), `tools/layout/tidy.py`
+
+**Inputs:** current positions read from the file, so the user's GUI moves are kept (SW1/2/3/5, R30, C59, R110–R113 moved by the user).
+
+**Fixed:** ICs, connectors, inductors, crystals, switches, test points.
+
+**Re-placed:** all 358 R/C/FB and the 8 LEDs.
+- **Rows:** each passive goes on the side of the part holding the pin it serves (a signal-net partner first, else a power pin of its group anchor), sorted in pin order. Rows run parallel to the IC edge with pads facing the pin, on a 0.05 mm grid with 0.6 mm courtyard gaps; a row is pushed outward as a whole until it is clear.
+- **Decaps:** spread over the pins of their power net.
+- **BGA decaps (62):** a slot ring on the bottom: under the two outer ball rings, then just outside the field. Each goes to the slot nearest a ball of its rail.
+- **LEDs:** D10–D17 in a row, each resistor directly below its LED.
+
+**Written:** backup `Latfun6.eprj.bak_passive_tidy_v4_20261121-005243`. 0 pad pairs < 0.6 mm on the project.
+
+### Compaction study (2026-11-21)
+
+- **Height is fixed:** the CEM bracket holes (5.05 mm from the top edge) and the fingers fix it. Only the length (167.65 mm is a maximum) can shrink.
+- **Trial** (`tidy.py` with DELTA: everything beyond x = 120 slides left):
+  - Passives fit at every length down to 135.65 mm.
+  - The fixed parts collide (`ovl.py`): 12 overlaps at −15 mm, 19 at −27 mm (switches/DIP/audio/LA header, TP field vs U9, power chain).
+  - So a shorter card needs the right-hand region re-planned, not shifted.
+- **Bottom side:**
+  - Required for the FPGA/DDR3 decaps (BGA body over the balls; every reference board does it).
+  - Since two-sided assembly is paid for anyway, more passives can go to the bottom to save top area.
+- **ALINX AX7020 lessons** (130 × 90 mm, 8 layers):
+  - Regulators as one column of identical cells (IC + L + caps + FB divider + a 2-pin rail test header labelled with the rail).
+  - User keys in a row along one edge, with labelled LEDs above them.
+  - DDR3 tight against the SoC.
+  - All connectors on edges; 4 corner holes.
 
 ## Section 5 — Net classes and widths (from §1 only)
 
