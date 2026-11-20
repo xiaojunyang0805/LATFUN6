@@ -38,16 +38,23 @@ Status flags used below: ✔ verified C-number + stock (JLCPCB API, 2026-11-20) 
 | H | Audio out | J4, R140–R143, C140–C145 |
 | I | Expansion + verification headers | J5–J8 (PMOD1–4), J9 (LA), J10 (loopback), TP_* signal test points |
 
-**Single page (p1)**: blocks occupy canvas regions; the A3 frame is cosmetic (enlarge to A1 later if wanted). Title-block corner (x > 2700, y < 300) kept clear. Creation coordinates (y up):
+**Single page (p1), A0 (usable ≈ x 20–4630, y 20–3290; title block x > 3830, y < 210, kept clear).** Since 2026-11-20 (user request) every block has a **red rectangle frame** (lineWidth 2, no fill) with a red title (16 pt) inside its top-left corner. Creation coordinates are y-up. Frame = top-left (x, y), width × height:
 
-| Region | Blocks | x range | y range |
-|---|---|---|---|
-| R1 | U5 (10 sub-parts, LFE5UM5G-45F-8BG381C) | 100–1700 | 140–1060 |
-| R2 | C support: decoupling, config/JTAG resistors, X1, DONE LED, SW1 | 100–1450 | 1150–1550 |
-| R3 | A + B: USB-C entry, regulators, shunts | 100–1450 | 1650–2250 |
-| R4 | D flash + E FT2232H, J2 | 1600–2550 | 1150–2250 |
-| R5 | F user I/O + EEPROM, H audio | 1600–2550 | 140–1030 |
-| R6 | G HDMI, I PMOD/LA/loopback/TPs | 2650–3250 | 400–2250 |
+| Block | Title | Frame top-left | W × H | Contents (old region) |
+|---|---|---|---|---|
+| B1 | POWER: 12 V slot/jack OR, 5 V, USB-C mux, rails, shunts | (40, 3280) | 1680 × 1330 | old R3 (to be rebuilt for v0.2) |
+| B2 | FPGA I/O BANKS + SERDES (U5) | (40, 1100) | 1680 × 950 | R1 |
+| B3 | FPGA DECOUPLING, CONFIG, 25 MHz CLOCK | (40, 1920) | 1680 × 790 | R2 |
+| B4 | USB-C #1: FT2232H JTAG + UART, QSPI FLASH | (1735, 2440) | 1200 × 1250 | R4 |
+| B5 | USER I/O: LEDs, buttons, DIP, EEPROM, AUDIO | (1735, 1160) | 1200 × 1120 | R5 (+ audio) |
+| B6 | HDMI OUT | (1735, 3280) | 1200 × 810 | new (was R6) |
+| B7 | SERDES: 2× CDCE6214, PCIe edge, SFP, SMA | (2950, 3280) | 1670 × 1000 | new |
+| B8 | DDR3L x16 + VREF | (2950, 2250) | 825 × 1170 | new |
+| B9 | GIGABIT ETHERNET | (3795, 2250) | 825 × 1170 | new |
+| B10 | USB 2.0 ULPI + USB-C #2 + microSD | (2950, 1050) | 825 × 1010 | new |
+| B11 | PMOD ×4, LA, loopback, TPs | (3795, 1050) | 825 × 820 | new (was R6) |
+
+Frame check (offline, 2026-11-20): all 165 placed parts lie fully inside a frame. Rule: a new part must land inside its block's frame, at least 30 units below the frame top (title strip).
 
 ### Signal flow
 
