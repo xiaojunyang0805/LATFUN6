@@ -1,0 +1,11 @@
+# build outputs
+hardware/latfun6/test/build/
+__pycache__/
+*.pyc
+# vendor files are not redistributed (download per tools/gen_board.py docstring)
+*.csv
+*.pdf
+# private working notes (kept local; see README)
+docs/handoff-LATFUN6.md
+docs/ulx3s-study.md
+notes/
