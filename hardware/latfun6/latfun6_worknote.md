@@ -44,6 +44,13 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **P1 re-distributed (2026-11-20, user: "Rework P1 for better distribution of parts").** 404 parts moved in place with the new `sch_move_components` tool, so designators, uids and BOM flags are kept.
+> - **Frames:** B1 is now x 40–1720 / y 1200–3280 and B3 is x 40–1720 / y 150–1170. The other frames are unchanged.
+> - **Method:** each block's parts were grouped into bands. The bands were spread evenly over the frame height and each band stretched across the width, keeping order and grouping.
+> - **Margins:** 60–100 units at the sides for stubs. B5 keeps y < 360 free for the audio filter.
+> - **Spacing, median gap to the nearest part (units):** B3 64→104, B4 72→104, B5 72→100, B8 28→50, B9 32→64, B11 80→118.
+> - **Saved-file check passed:** 408 parts, all at their planned positions, no duplicates or overlaps, all inside frames.
+
 > **Two schematic pages (2026-11-20, user decision).** The widened sheet left B2 outside the border, so the design moved to two A0 pages.
 > - **P1:** B1, B3–B11. B3's frame now covers the old B2 area (x 40–1720, y 150–1920).
 > - **P2:** B2 only. U5's 10 sub-parts in a 4 × 3 grid (.1 .2 .5 .6 / .7 .8 .3 .4 / .10 .9), columns at x 615/1760/2905/4050 and rows at y 2750/1750/750. Frame x 40–4620, y 230–3280.
