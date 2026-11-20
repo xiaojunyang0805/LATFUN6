@@ -44,6 +44,13 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **B5 audio placed (2026-11-20), gge13001–13011.** Placed in the reserved strip at the bottom of B5 (y < 360).
+> - J4 PJ-313D 3.5 mm TRS jack (C668608) at (2700,210).
+> - **Left channel (y 290):** R140 1 k (C11702) → C140 10 nF (C15195) → R141 1 k → C141 10 nF → C142 10 µF (C19702) to the jack tip.
+> - **Right channel (y 140):** R142/C143/R143/C144/C145, to the ring.
+> - Saved-file check passed: P1 has 419 parts, no duplicates or overlaps, all inside frames.
+> - **S3 placement is complete for every block** (P1: B1, B3–B11; P2: B2). Next: S4 wiring.
+
 > **P1 re-distributed (2026-11-20, user: "Rework P1 for better distribution of parts").** 404 parts moved in place with the new `sch_move_components` tool, so designators, uids and BOM flags are kept.
 > - **Frames:** B1 is now x 40–1720 / y 1200–3280 and B3 is x 40–1720 / y 150–1170. The other frames are unchanged.
 > - **Method:** each block's parts were grouped into bands. The bands were spread evenly over the frame height and each band stretched across the width, keeping order and grouping.
