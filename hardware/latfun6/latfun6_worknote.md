@@ -44,6 +44,13 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **Two schematic pages (2026-11-20, user decision).** The widened sheet left B2 outside the border, so the design moved to two A0 pages.
+> - **P1:** B1, B3–B11. B3's frame now covers the old B2 area (x 40–1720, y 150–1920).
+> - **P2:** B2 only. U5's 10 sub-parts in a 4 × 3 grid (.1 .2 .5 .6 / .7 .8 .3 .4 / .10 .9), columns at x 615/1760/2905/4050 and rows at y 2750/1750/750. Frame x 40–4620, y 230–3280.
+> - Every sub-part keeps designator U5 and uid gge5001. Saved-file check passed: P1 has 408 parts, P2 has 10.
+> - Nets cross between pages by name. The stub-wire `net=` names must match exactly on both pages.
+> - New MCP page tools: `sch_list_pages`, `sch_current_page`, `sch_open_page`.
+
 > **B6 HDMI, B11 headers placed; B2 re-arranged (2026-11-20).** Saved-file check passed: 418 parts, no duplicates or overlaps, all inside frames.
 > - **B6 (gge11001–11015):** J3 HDMI-001S (C720616), U10/U11 TPD4E05U06 (C138714), U12 PCA9306 (C33196), U13 TPS2051C (C129581), R130/R131 2.2 k, R132/R133 4.7 k, R134 200 k (C25764), R135 10 k / R136 20 k HPD divider (C25765), C130/C132 100 nF, C131 1 µF.
 > - **B11 (gge12001–12018):** J5–J8 A2541HWR-2x6P female right-angle PMOD (C5333437 ⚠ low stock), J9 A2541WV-2x5P male 2×5 LA header (C225520, replaces the female C843271), J10 A2541WV-2P loopback (C225477).
