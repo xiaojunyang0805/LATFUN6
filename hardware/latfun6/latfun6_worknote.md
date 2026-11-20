@@ -14,6 +14,16 @@
 > **B1 power block placed (2026-11-20):** 95 parts (gge6001–6095) inside the B1 frame, on 4 rows: 12 V entry/OR + LMR33630 + TPS2121; USB-C #1 entry; 3V3 (U2 TPS62826) + 1V2 core (U3 TPS62827); 1V35 (U24), 1V8 (U25), 1V2_SER (U26 TPS7A91), 2V5 (U4) + power LED. Offline check: 228 parts total, no duplicate or placeholder designators, no body overlaps, every part inside a frame.
 > ⚠ **MCP save lesson (E-new):** `sch_save` kept returning `true` while EasyEDA had stopped writing the document; 48 parts were lost when the project was reopened. **Rule: after every `sch_save`, check that `documents.updated_at` advanced in the .eprj (read-only SQLite); re-check every ≈ 6 placements.**
 
+> **B7 SERDES block placed (2026-11-20):** 63 parts (gge7001–7063), all inside the B7 frame. Offline check on the saved file: 291 parts total, no overlaps, no duplicate designators.
+> - **Clocks:** U27/U28 CDCE6214 with Y2/Y3 25 MHz crystals (CL 8 pF, no external load caps); 16 decoupling caps C300–C315 (4.7 µF / 470 nF / 100 nF per TI §8.3.2) and beads FB10–FB15.
+> - **Supplies:** VDD_REF/VDD_VCO from 3V3. **VDDO_12/34 from 1V8**, which puts the LVDS-like output common-mode at 0.85–1.05 V, inside the ECP5 REFCLK range of 0–1.6 V; 3.3 V outputs (VCM up to 1.375 V) would be marginal.
+> - **Strapping:** U27 REFSEL and HW_SW_CTRL both come from slot-detect (R300 1 k from slot 3.3 V, R301 10 k to GND): in a slot it uses PRIREF (slot 100 MHz) with EEPROM page 1; on the bench it uses SECREF (crystal) with page 0. U28 REFSEL is low (R302) and HW_SW_CTRL high (R303). Removing the strap resistor lets the pin float, which gives fall-back mode for recovery.
+> - **I²C:** U27 sits on the main I²C bus at 0x68; U28 on the SFP I²C bus at 0x68. There is no address clash: the SFP module uses 0x50/0x51 and the EEPROM 0x50 on the main bus.
+> - **PCIe:** C320/C321 slot REFCLK AC caps (CDCE inputs must be AC-coupled); C322/C323 100 nF TX caps; R304 10 k PERST# pull-up (bench); R305 0 Ω CLKREQ#→GND (DNP option).
+> - **SFP:** J13 TE 1888247-1 and J14 cage 2227302-1 (LCSC stock 0: consign); R310–R313 0 Ω data links; L30/L31 4.7 µH with C330–C335 VccT/VccR filters; R320–R324 4.7 k pull-ups on TX_FAULT, LOS, MOD_ABS, SCL, SDA.
+> - **SMA:** J15–J18 Molex 73251-1150 and C340–C343 100 nF on TX and RX (DCU1 CH1).
+> - **Still missing: J12, the PCIe x4 card edge.** No device exists in the EasyEDA library, and the MCP cannot create symbols or footprints. KiCad's `Bus_PCI_Express_x4` symbol (64 pins) and `BUS_PCIexpress_x4` footprint (64 pads) are downloaded to `hardware/EDA/import/` for the user to import (EasyEDA Pro: File → Import → KiCad) as a project device.
+
 **Date started:** 2026-11-20
 **Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
 **Design spec:** `docs/definition.md`
