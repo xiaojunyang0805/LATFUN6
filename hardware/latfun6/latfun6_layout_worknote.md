@@ -3,9 +3,9 @@
 **Project:** LATFUN6, open ECP5-5G application board
 **Board:** LATFUN6 rev v0.2. File `hardware/EDA/Latfun6.eprj`, PCB document `pcb1`.
 **Date started:** 2026-11-20
-**Status:** W2 placement draft v1 computed and checked on a copy; waiting for EDA to close before writing
+**Status:** W2 placement v1 written to the project 2026-11-21 (awaiting user review in EDA)
 **Schematic worknote:** `latfun6_worknote.md` (gates A2 / C3 / C4 / D PASS, 2026-11-20)
-**EasyEDA Pro version:** ✱ record at the first EDA session (file format check per `eprj_file_format.md` §8)
+**EasyEDA Pro version:** V2.2.47.7
 
 > Worknote-first: write the plan, then execute. **State is read from the file** (`eprj_check.py`), never from this note.
 > **Starting state (file, 2026-11-20):** `pcb1` has 2 copper layers, 0 components, 0 tracks. Rules in the file: clearance 0.152 mm, track 0.152/0.254/2.54 mm, via 0.610/0.305 mm. `eprj_check.py --selftest` PASS.
@@ -120,6 +120,11 @@ Draft, to confirm once J12's finger datum is known. Bracket edge = left (x = 0),
 - Pad-to-pad (exact shapes, `padcheck.py`): **0 pairs < 0.6 mm**.
 - No non-edge part off the outline.
 - PAD_NET identical before and after.
+
+**Written 2026-11-21** (EDA closed): candidate rebuilt from the latest saved file, then `Project.write`.
+- Backup `Latfun6.eprj.bak_placement_v1_20261121-000606`; integrity ok, read-back identical.
+- All 451 parts at their plan positions.
+- Re-check on the project: 0 pad pairs < 0.6 mm; PAD_NET unchanged.
 
 **Open ✱ items:**
 1. J13 SFP connector position inside the cage: placed at cage x +8.5 mm, rotated 90°. Must be checked against the TE 2227302-1 / 1888247-1 application drawing; pin-1 side decides TD/RD.
