@@ -36,6 +36,14 @@
 > - CK AC termination: R341/R342 49.9 Ω + C364 100 nF (fit or DNP at layout). No VTT: single point-to-point chip with ODT.
 > - J12 'Add into BOM' = no (user).
 
+> **B9 Ethernet block placed (2026-11-20):** 31 parts (gge9001–9031) inside the B9 frame; saved-file check passed (352 parts total, no duplicates or overlaps, all inside frames).
+> - U31 RTL8211F-VD-CG (C19100357) and J19 HR911130C magjack (C50933, 1000BASE-T, internal Bob Smith termination). J19 was re-placed at (4450, 1700) because the first spot crossed the frame edge.
+> - Y4 25 MHz crystal (C5382669, CL 8 pF) with C370/C371 12 pF.
+> - L32 2.2 µH on REG_OUT (C55755, 0805 multilayer, 250 mΩ / 420 mA Isat): adequate for the ≈ 0.15 A 0.9 V core, but compare against the Realtek reference at A2.
+> - Decoupling: C372 4.7 µF + C373–C375 100 nF (0.9 V); C376–C379 100 nF + C380 10 µF (3.3 V).
+> - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
+> - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
+
 **Date started:** 2026-11-20
 **Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
 **Design spec:** `docs/definition.md`
