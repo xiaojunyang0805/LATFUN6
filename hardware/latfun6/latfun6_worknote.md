@@ -44,6 +44,15 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **B10 USB 2.0 + microSD placed (2026-11-20):** 33 parts (gge10001–10033) inside the B10 frame; saved-file check passed (385 parts total, no duplicates or overlaps, all inside frames).
+> - U32 USB3320C-EZK-TR (C132156). Y5 24 MHz 12 pF crystal (C5181479; the library search for C70590 returned a SIM socket, an E7 catch) with C390/C391 18 pF and R370 1 M across XI–XO.
+> - ⚠ **Check Y5's ESR at A2**: the USB3320 needs ≤ 30 Ω, and YXC's alternative is listed at 50 Ω.
+> - R371 8.06 k 1 % RBIAS. Decoupling: C392 2.2 µF (VDD33 = VBAT), C393/C394 100 nF + C395 1 µF (VDD18 from 1V8), C396 100 nF (VDDIO), C397 10 µF bulk. R373 10 k RESETB pull-down.
+> - VBUS sensing: R372 10 k RVBUS (device mode) with C398 4.7 µF CVBUS on the connector side.
+> - J20 USB-C #2 (C165948) with R374/R375 5.1 k Rd (device, fitted) and R376/R377 56 k Rp to 5 V (host, DNP).
+> - U33 TPS2051C VBUS switch (EN = CPEN from the PHY, for host mode) with C399 1 µF in and C400 22 µF out. ⚠ Legacy host spec asks for ≥ 120 µF; decide at A2.
+> - J21 TF-01A microSD (C91145). R380–R384 10 k pull-ups on CMD/DAT0–3, R385 10 k card-detect pull-up, R386 33 Ω CLK series, C401 100 nF + C402 10 µF.
+
 **Date started:** 2026-11-20
 **Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
 **Design spec:** `docs/definition.md`
