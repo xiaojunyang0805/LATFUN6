@@ -11,6 +11,9 @@
 **Board:** latfun6 rev v0.1
 > **U5 replaced (2026-11-20):** the 9 LFE5U-25F parts were deleted and replaced by **LFE5UM5G-45F-8BG381C** (LCSC C7215983, consigned), uid gge5001. Sub-parts: .1 bank7 (200,850) · .2 bank6 (580,850) · .5 bank3 (960,850) · .6 bank2 (1340,850) · .7 bank1 (200,400) · .8 bank0 (580,400) · .3 config/bank8 (960,420) · .4 SERDES (1340,400) · .10 power (1620,830) · .9 GND (1620,380). **Symbol check: 381/381 balls match the Lattice ECP5-5G-45 CSV (51578), 0 name mismatches, each bank on exactly one sub-part.** Datasheet check results → definition.md §10.
 
+> **B1 power block placed (2026-11-20):** 95 parts (gge6001–6095) inside the B1 frame, on 4 rows: 12 V entry/OR + LMR33630 + TPS2121; USB-C #1 entry; 3V3 (U2 TPS62826) + 1V2 core (U3 TPS62827); 1V35 (U24), 1V8 (U25), 1V2_SER (U26 TPS7A91), 2V5 (U4) + power LED. Offline check: 228 parts total, no duplicate or placeholder designators, no body overlaps, every part inside a frame.
+> ⚠ **MCP save lesson (E-new):** `sch_save` kept returning `true` while EasyEDA had stopped writing the document; 48 parts were lost when the project was reopened. **Rule: after every `sch_save`, check that `documents.updated_at` advanced in the .eprj (read-only SQLite); re-check every ≈ 6 placements.**
+
 **Date started:** 2026-11-20
 **Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
 **Design spec:** `docs/definition.md`
