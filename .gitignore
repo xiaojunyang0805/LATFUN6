@@ -13,3 +13,4 @@ notes/
 # EasyEDA project files are local until reviewed (never publish a file derived from another project)
 hardware/EDA/
 *.eprj
+hardware/latfun6/test/*.log

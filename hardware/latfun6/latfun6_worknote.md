@@ -1,6 +1,10 @@
 # LATFUN6 Schematic Worknote
 
 > ⚠ **RE-BASELINE IN PROGRESS (2026-11-20): definition v0.2, application board.** FPGA → LFE5UM5G-45F-8BG381 (85F-ready); adds SFP + SMA + PCIe x1 (SERDES), DDR3L 512 MB, GbE (RTL8211F), microSD, USB 2.0 ULPI, 12 V slot power. Core rail 1.1 → **1.2 V**. Sections below still describe v0.1 where not yet updated; blocks A/B(partly)/D/E/F/H placements are reused. U5 (BG256) and `board/latfun6.json`/`.lpf` (v0.1) are **superseded** and will be regenerated against the ECP5-5G-45 CSV. See `docs/definition.md` §8.
+>
+> **v0.2 pinout DONE (2026-11-20):** `tools/gen_board.py` v0.2 → `board/latfun6.json`, `.lpf`, `latfun6_platform.py` (LiteX). 175 signals / 175 balls; checks: banks + VCCIO (3.3 V: 0/1/2/3/8; 1.35 V: 6/7), pairs, A/B LVDS pairs for PMODs, PCLK for clk_25mhz / eth_rx_clk / ulpi_clk, DDR3 byte lanes inside their DQS groups (byte0 L41 DQS K2, byte1 L29 DQS H4), K16/K17 unused, identical roles on the 85F. DDR3 ball map follows Lattice's ECP5-5G Versa reference (same device/package) plus A13 = A3, A14 = D3.
+> **P&R proof:** `test/litex_smoke.py` (LiteX: LiteDRAM ECP5DDRPHY + MT41K256M16, LiteEth RGMII + Etherbone, UART bridge) and `test/make_io_smoke.py` (all 125 non-DDR I/O) both route with **0 errors on LFE5UM5G-45F and -85F** (nextpnr `--um5g-45k/85k --package CABGA381 --speed 8`). Ethernet RX 125 MHz meets timing (184 / 156 MHz). The smoke SoC's sys clock is unconstrained (gateware task, not a board risk).
+> **Open-flow support found:** SERDES ✅ LiteICLink `serdes_ecp5` · RGMII ✅ LiteEth `ecp5rgmii` · DDR3 ✅ LiteDRAM `ECP5DDRPHY` · **PCIe ⚠ LitePCIe has no ECP5 PHY** (Xilinx/Cyclone V only); open ECP5 PCIe exists only as experimental Gen1 x1 work (Yumewatari PHY, ECP5-PCIe GSoC); Lattice's endpoint IP is proprietary (Diamond). Decision pending with the user.
 
 
 **Project:** LATFUN6, the open ECP5 textbook board for the Open FPGA Tutorial

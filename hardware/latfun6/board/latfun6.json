@@ -1,17 +1,17 @@
 {
  "name": "LATFUN6",
- "revision": "v0.1-draft",
+ "revision": "v0.2-draft",
  "fpga": {
-  "part": "LFE5U-25F-7BG256I",
-  "family": "ECP5",
-  "device": "LFE5U-25F",
-  "package": "CABGA256",
-  "speed": 7,
+  "part": "LFE5UM5G-45F-8BG381C",
+  "family": "ECP5-5G",
+  "device": "LFE5UM5G-45F",
+  "package": "CABGA381",
+  "speed": 8,
   "alt_parts": [
-   "LFE5U-25F-6BG256C",
-   "LFE5U-45F-xBG256x"
+   "LFE5UM5G-45F-8BG381I",
+   "LFE5UM5G-85F-8BG381x (K16/K17 unused)"
   ],
-  "nextpnr": "--25k --package CABGA256 --speed 7"
+  "nextpnr": "--um5g-45k --package CABGA381 --speed 8"
  },
  "clock": {
   "name": "clk_25mhz",
@@ -22,9 +22,19 @@
   "1": 3.3,
   "2": 3.3,
   "3": 3.3,
-  "6": 3.3,
-  "7": 3.3,
+  "6": 1.35,
+  "7": 1.35,
   "8": 3.3
+ },
+ "banned_balls": [
+  "K16",
+  "K17"
+ ],
+ "serdes": {
+  "DCU0_CH0": "PCIe x1 (REFCLK_D0 from slot, 100 MHz)",
+  "DCU0_CH1": "spare",
+  "DCU1_CH0": "SFP cage (REFCLK_D1, on-board oscillator)",
+  "DCU1_CH1": "SMA TX/RX pairs"
  },
  "licence": {
   "hardware": "CERN-OHL-S-2.0",
@@ -33,869 +43,1933 @@
  },
  "signals": {
   "clk_25mhz": {
-   "ball": "A7",
+   "ball": "B12",
    "io": "LVCMOS33",
-   "feature": "R1 25 MHz oscillator (PCLKT0_0)",
-   "bank": "0",
-   "pio": "PT29A",
-   "dual": "PCLKT0_0",
+   "feature": "R1 25 MHz oscillator (PCLKT1_0)",
+   "bank": "1",
+   "pio": "PT44A",
+   "dual": "PCLKT1_0",
+   "dqs": "-",
    "attrs": {}
   },
   "led[0]": {
-   "ball": "B9",
+   "ball": "A12",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT38A",
-   "dual": "GR_PCLK1_0",
+   "pio": "PT49A",
+   "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "led[1]": {
-   "ball": "C9",
+   "ball": "A13",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT38B",
-   "dual": "GR_PCLK1_1",
+   "pio": "PT49B",
+   "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "led[2]": {
-   "ball": "D9",
+   "ball": "B13",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT40A",
+   "pio": "PT51A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "led[3]": {
-   "ball": "E9",
+   "ball": "C13",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT40B",
+   "pio": "PT51B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "led[4]": {
-   "ball": "A9",
+   "ball": "D13",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT42A",
+   "pio": "PT53A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "led[5]": {
-   "ball": "A10",
+   "ball": "E13",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT42B",
+   "pio": "PT53B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "led[6]": {
-   "ball": "B10",
+   "ball": "A14",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT44A",
+   "pio": "PT56A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "led[7]": {
-   "ball": "C10",
+   "ball": "C14",
    "io": "LVCMOS33",
    "feature": "R2 user LED",
    "bank": "1",
-   "pio": "PT44B",
+   "pio": "PT56B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
   "btn_n[0]": {
-   "ball": "D10",
+   "ball": "D14",
    "io": "LVCMOS33",
    "feature": "R3 button (0=RESET, 1=un-debounced)",
    "bank": "1",
-   "pio": "PT47A",
+   "pio": "PT58A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "btn_n[1]": {
-   "ball": "E10",
+   "ball": "E14",
    "io": "LVCMOS33",
    "feature": "R3 button (0=RESET, 1=un-debounced)",
    "bank": "1",
-   "pio": "PT47B",
+   "pio": "PT58B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "btn_n[2]": {
-   "ball": "B11",
+   "ball": "A15",
    "io": "LVCMOS33",
    "feature": "R3 button (0=RESET, 1=un-debounced)",
    "bank": "1",
-   "pio": "PT49A",
+   "pio": "PT67A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "btn_n[3]": {
-   "ball": "C11",
+   "ball": "B15",
    "io": "LVCMOS33",
    "feature": "R3 button (0=RESET, 1=un-debounced)",
    "bank": "1",
-   "pio": "PT49B",
+   "pio": "PT69A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "sw_n[0]": {
-   "ball": "D11",
+   "ball": "C15",
    "io": "LVCMOS33",
    "feature": "R4 DIP switch",
    "bank": "1",
-   "pio": "PT51A",
+   "pio": "PT69B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "sw_n[1]": {
-   "ball": "E11",
+   "ball": "D15",
    "io": "LVCMOS33",
    "feature": "R4 DIP switch",
    "bank": "1",
-   "pio": "PT51B",
+   "pio": "PT71A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "sw_n[2]": {
-   "ball": "A11",
+   "ball": "E15",
    "io": "LVCMOS33",
    "feature": "R4 DIP switch",
    "bank": "1",
-   "pio": "PT53A",
+   "pio": "PT71B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "sw_n[3]": {
-   "ball": "A12",
+   "ball": "A16",
    "io": "LVCMOS33",
    "feature": "R4 DIP switch",
    "bank": "1",
-   "pio": "PT53B",
+   "pio": "PT74A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "uart_tx": {
-   "ball": "B12",
+   "ball": "B16",
    "io": "LVCMOS33",
    "feature": "R5 FPGA->PC (FT2232H BDBUS1 RXD)",
    "bank": "1",
-   "pio": "PT56A",
+   "pio": "PT74B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
   "uart_rx": {
-   "ball": "C12",
+   "ball": "C16",
    "io": "LVCMOS33",
    "feature": "R5 PC->FPGA (FT2232H BDBUS0 TXD)",
    "bank": "1",
-   "pio": "PT56B",
+   "pio": "PT76A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
   "uart_rts_n": {
-   "ball": "D12",
+   "ball": "D16",
    "io": "LVCMOS33",
    "feature": "R5 FPGA->FT CTS# (BDBUS3)",
    "bank": "1",
-   "pio": "PT58A",
+   "pio": "PT76B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
   "uart_cts_n": {
-   "ball": "E12",
+   "ball": "B17",
    "io": "LVCMOS33",
    "feature": "R5 FT RTS# (BDBUS2)->FPGA",
    "bank": "1",
-   "pio": "PT58B",
+   "pio": "PT78A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "PULLMODE": "UP"
    }
   },
-  "flash_io2": {
-   "ball": "M7",
+  "la[0]": {
+   "ball": "C17",
    "io": "LVCMOS33",
-   "feature": "R8 QSPI IO2 (D2)",
-   "bank": "8",
-   "pio": "PB9B",
-   "dual": "D2/IO2",
-   "attrs": {}
-  },
-  "flash_io3": {
-   "ball": "N7",
-   "io": "LVCMOS33",
-   "feature": "R8 QSPI IO3 (D3)",
-   "bank": "8",
-   "pio": "PB9A",
-   "dual": "D3/IO3",
-   "attrs": {}
-  },
-  "flash_mosi": {
-   "ball": "T8",
-   "io": "LVCMOS33",
-   "feature": "R8 config D0/MOSI",
-   "bank": "8",
-   "pio": "PB11B",
-   "dual": "D0/MOSI/IO0",
-   "attrs": {}
-  },
-  "flash_miso": {
-   "ball": "T7",
-   "io": "LVCMOS33",
-   "feature": "R8 config D1/MISO",
-   "bank": "8",
-   "pio": "PB11A",
-   "dual": "D1/MISO/IO1",
-   "attrs": {}
-  },
-  "flash_cs_n": {
-   "ball": "N8",
-   "io": "LVCMOS33",
-   "feature": "R8 config CSSPIN (4.7k pull-up at flash)",
-   "bank": "8",
-   "pio": "PB15A",
-   "dual": "HOLDN/DI/BUSY/CSSPIN/CEN",
-   "attrs": {}
-  },
-  "i2c_scl": {
-   "ball": "E5",
-   "io": "LVCMOS33",
-   "feature": "R10 24C02 SCL (4.7k pull-up)",
-   "bank": "0",
-   "pio": "PT13A",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT78B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
-  "i2c_sda": {
-   "ball": "D5",
+  "la[1]": {
+   "ball": "A17",
    "io": "LVCMOS33",
-   "feature": "R10 24C02 SDA (4.7k pull-up)",
-   "bank": "0",
-   "pio": "PT13B",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT80A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
-  "audio_l": {
-   "ball": "C6",
+  "la[2]": {
+   "ball": "B18",
    "io": "LVCMOS33",
-   "feature": "R11 PWM/delta-sigma -> RC -> jack L",
-   "bank": "0",
-   "pio": "PT22A",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT80B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
-  "audio_r": {
-   "ball": "B6",
+  "la[3]": {
+   "ball": "A18",
    "io": "LVCMOS33",
-   "feature": "R11 PWM/delta-sigma -> RC -> jack R",
-   "bank": "0",
-   "pio": "PT22B",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT83A",
    "dual": "-",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "la[4]": {
+   "ball": "B19",
+   "io": "LVCMOS33",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT83B",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "la[5]": {
+   "ball": "A19",
+   "io": "LVCMOS33",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT85A",
+   "dual": "URC_GPLL1T_IN",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "la[6]": {
+   "ball": "B20",
+   "io": "LVCMOS33",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT85B",
+   "dual": "URC_GPLL1C_IN",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "la[7]": {
+   "ball": "D11",
+   "io": "LVCMOS33",
+   "feature": "R14 LA probe out",
+   "bank": "1",
+   "pio": "PT42A",
+   "dual": "PCLKT1_1",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "loop_a": {
+   "ball": "E11",
+   "io": "LVCMOS33",
+   "feature": "R17 loopback jumper side A",
+   "bank": "1",
+   "pio": "PT42B",
+   "dual": "PCLKC1_1",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "loop_b": {
+   "ball": "D12",
+   "io": "LVCMOS33",
+   "feature": "R17 loopback jumper side B",
+   "bank": "1",
+   "pio": "PT47A",
+   "dual": "GR_PCLK1_0",
+   "dqs": "-",
+   "attrs": {
+    "PULLMODE": "DOWN"
+   }
+  },
+  "tp_pll": {
+   "ball": "E12",
+   "io": "LVCMOS33",
+   "feature": "R15 PLL/clock observation test point",
+   "bank": "1",
+   "pio": "PT47B",
+   "dual": "GR_PCLK1_1",
+   "dqs": "-",
    "attrs": {}
   },
   "gpdi_clk_p": {
-   "ball": "A3",
-   "io": "LVCMOS33D",
-   "feature": "R12 HDMI TMDS",
-   "bank": "0",
-   "pio": "PT6A",
-   "dual": "-",
-   "attrs": {
-    "DRIVE": "4"
-   }
-  },
-  "gpdi_clk_n": {
-   "ball": "A4",
-   "io": "LVCMOS33D",
-   "feature": "R12 HDMI TMDS (comp, implied by _p)",
-   "bank": "0",
-   "pio": "PT6B",
-   "dual": "-",
-   "attrs": {}
-  },
-  "gpdi_d0_p": {
-   "ball": "C4",
-   "io": "LVCMOS33D",
-   "feature": "R12 HDMI TMDS",
-   "bank": "0",
-   "pio": "PT11A",
-   "dual": "-",
-   "attrs": {
-    "DRIVE": "4"
-   }
-  },
-  "gpdi_d0_n": {
-   "ball": "B4",
-   "io": "LVCMOS33D",
-   "feature": "R12 HDMI TMDS (comp, implied by _p)",
-   "bank": "0",
-   "pio": "PT11B",
-   "dual": "-",
-   "attrs": {}
-  },
-  "gpdi_d1_p": {
-   "ball": "C5",
-   "io": "LVCMOS33D",
-   "feature": "R12 HDMI TMDS",
-   "bank": "0",
-   "pio": "PT15A",
-   "dual": "-",
-   "attrs": {
-    "DRIVE": "4"
-   }
-  },
-  "gpdi_d1_n": {
-   "ball": "B5",
-   "io": "LVCMOS33D",
-   "feature": "R12 HDMI TMDS (comp, implied by _p)",
-   "bank": "0",
-   "pio": "PT15B",
-   "dual": "-",
-   "attrs": {}
-  },
-  "gpdi_d2_p": {
-   "ball": "A5",
+   "ball": "A7",
    "io": "LVCMOS33D",
    "feature": "R12 HDMI TMDS",
    "bank": "0",
    "pio": "PT18A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {
     "DRIVE": "4"
    }
   },
-  "gpdi_d2_n": {
-   "ball": "A6",
+  "gpdi_clk_n": {
+   "ball": "A8",
    "io": "LVCMOS33D",
    "feature": "R12 HDMI TMDS (comp, implied by _p)",
    "bank": "0",
    "pio": "PT18B",
    "dual": "-",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "gpdi_d0_p": {
+   "ball": "C8",
+   "io": "LVCMOS33D",
+   "feature": "R12 HDMI TMDS",
+   "bank": "0",
+   "pio": "PT15A",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {
+    "DRIVE": "4"
+   }
+  },
+  "gpdi_d0_n": {
+   "ball": "B8",
+   "io": "LVCMOS33D",
+   "feature": "R12 HDMI TMDS (comp, implied by _p)",
+   "bank": "0",
+   "pio": "PT15B",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "gpdi_d1_p": {
+   "ball": "E8",
+   "io": "LVCMOS33D",
+   "feature": "R12 HDMI TMDS",
+   "bank": "0",
+   "pio": "PT13A",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {
+    "DRIVE": "4"
+   }
+  },
+  "gpdi_d1_n": {
+   "ball": "D8",
+   "io": "LVCMOS33D",
+   "feature": "R12 HDMI TMDS (comp, implied by _p)",
+   "bank": "0",
+   "pio": "PT13B",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "gpdi_d2_p": {
+   "ball": "C6",
+   "io": "LVCMOS33D",
+   "feature": "R12 HDMI TMDS",
+   "bank": "0",
+   "pio": "PT11A",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {
+    "DRIVE": "4"
+   }
+  },
+  "gpdi_d2_n": {
+   "ball": "C7",
+   "io": "LVCMOS33D",
+   "feature": "R12 HDMI TMDS (comp, implied by _p)",
+   "bank": "0",
+   "pio": "PT11B",
+   "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
   "gpdi_scl": {
-   "ball": "E4",
+   "ball": "D9",
    "io": "LVCMOS33",
    "feature": "R12 HDMI DDC SCL (via level shifter)",
    "bank": "0",
-   "pio": "PT9A",
+   "pio": "PT20A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
   "gpdi_sda": {
-   "ball": "D4",
+   "ball": "E9",
    "io": "LVCMOS33",
    "feature": "R12 HDMI DDC SDA (via level shifter)",
    "bank": "0",
-   "pio": "PT9B",
+   "pio": "PT20B",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
   "gpdi_hpd": {
-   "ball": "E6",
+   "ball": "C9",
    "io": "LVCMOS33",
    "feature": "R12 HDMI hot-plug detect (divided 5V)",
    "bank": "0",
-   "pio": "PT20A",
+   "pio": "PT27A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
-  "la[0]": {
-   "ball": "B13",
+  "sd_clk": {
+   "ball": "E6",
    "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT60A",
+   "feature": "R28 microSD CLK",
+   "bank": "0",
+   "pio": "PT6A",
    "dual": "-",
+   "dqs": "-",
    "attrs": {}
   },
-  "la[1]": {
-   "ball": "C13",
+  "sd_cmd": {
+   "ball": "D6",
    "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT60B",
+   "feature": "R28 microSD CMD",
+   "bank": "0",
+   "pio": "PT6B",
    "dual": "-",
-   "attrs": {}
-  },
-  "la[2]": {
-   "ball": "D13",
-   "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT62A",
-   "dual": "-",
-   "attrs": {}
-  },
-  "la[3]": {
-   "ball": "E13",
-   "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT62B",
-   "dual": "-",
-   "attrs": {}
-  },
-  "la[4]": {
-   "ball": "A13",
-   "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT65A",
-   "dual": "-",
-   "attrs": {}
-  },
-  "la[5]": {
-   "ball": "A14",
-   "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT65B",
-   "dual": "-",
-   "attrs": {}
-  },
-  "la[6]": {
-   "ball": "B14",
-   "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT67A",
-   "dual": "-",
-   "attrs": {}
-  },
-  "la[7]": {
-   "ball": "A15",
-   "io": "LVCMOS33",
-   "feature": "R14 LA probe out",
-   "bank": "1",
-   "pio": "PT67B",
-   "dual": "-",
-   "attrs": {}
-  },
-  "tp_pll": {
-   "ball": "C8",
-   "io": "LVCMOS33",
-   "feature": "R15 PLL/clock observation test point",
-   "bank": "1",
-   "pio": "PT35A",
-   "dual": "PCLKT1_0",
-   "attrs": {}
-  },
-  "loop_a": {
-   "ball": "E8",
-   "io": "LVCMOS33",
-   "feature": "R17 loopback jumper side A",
-   "bank": "1",
-   "pio": "PT33A",
-   "dual": "PCLKT1_1",
-   "attrs": {}
-  },
-  "loop_b": {
-   "ball": "D8",
-   "io": "LVCMOS33",
-   "feature": "R17 loopback jumper side B",
-   "bank": "1",
-   "pio": "PT33B",
-   "dual": "PCLKC1_1",
+   "dqs": "-",
    "attrs": {
-    "PULLMODE": "DOWN"
+    "PULLMODE": "UP"
    }
   },
+  "sd_dat[0]": {
+   "ball": "E7",
+   "io": "LVCMOS33",
+   "feature": "R28 microSD DAT",
+   "bank": "0",
+   "pio": "PT9A",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "sd_dat[1]": {
+   "ball": "D7",
+   "io": "LVCMOS33",
+   "feature": "R28 microSD DAT",
+   "bank": "0",
+   "pio": "PT9B",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "sd_dat[2]": {
+   "ball": "A6",
+   "io": "LVCMOS33",
+   "feature": "R28 microSD DAT",
+   "bank": "0",
+   "pio": "PT4A",
+   "dual": "ULC_GPLL1T_IN",
+   "dqs": "-",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "sd_dat[3]": {
+   "ball": "B6",
+   "io": "LVCMOS33",
+   "feature": "R28 microSD DAT",
+   "bank": "0",
+   "pio": "PT4B",
+   "dual": "ULC_GPLL1C_IN",
+   "dqs": "-",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "sd_det_n": {
+   "ball": "D10",
+   "io": "LVCMOS33",
+   "feature": "R28 microSD card detect",
+   "bank": "0",
+   "pio": "PT29A",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "sfp_scl": {
+   "ball": "E10",
+   "io": "LVCMOS33",
+   "feature": "R23 SFP module I2C SCL (4.7k PU)",
+   "bank": "0",
+   "pio": "PT29B",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "sfp_sda": {
+   "ball": "B9",
+   "io": "LVCMOS33",
+   "feature": "R23 SFP module I2C SDA (4.7k PU)",
+   "bank": "0",
+   "pio": "PT31A",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "pcie_perst_n": {
+   "ball": "C10",
+   "io": "LVCMOS33",
+   "feature": "R25 PCIe PERST# (from slot)",
+   "bank": "0",
+   "pio": "PT31B",
+   "dual": "-",
+   "dqs": "-",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "pcie_wake_n": {
+   "ball": "A9",
+   "io": "LVCMOS33",
+   "feature": "R25 PCIe WAKE# (open drain to slot)",
+   "bank": "0",
+   "pio": "PT33A",
+   "dual": "GR_PCLK0_1",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "pcie_clkreq_n": {
+   "ball": "B10",
+   "io": "LVCMOS33",
+   "feature": "R25 PCIe CLKREQ# (open drain)",
+   "bank": "0",
+   "pio": "PT33B",
+   "dual": "GR_PCLK0_0",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "i2c_scl": {
+   "ball": "A10",
+   "io": "LVCMOS33",
+   "feature": "R10 24C02 SCL (MAC address + board ID)",
+   "bank": "0",
+   "pio": "PT36A",
+   "dual": "PCLKT0_1",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "i2c_sda": {
+   "ball": "A11",
+   "io": "LVCMOS33",
+   "feature": "R10 24C02 SDA",
+   "bank": "0",
+   "pio": "PT36B",
+   "dual": "PCLKC0_1",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "audio_l": {
+   "ball": "B11",
+   "io": "LVCMOS33",
+   "feature": "R11 PWM/delta-sigma -> RC -> jack L",
+   "bank": "0",
+   "pio": "PT38A",
+   "dual": "PCLKT0_0",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "audio_r": {
+   "ball": "C11",
+   "io": "LVCMOS33",
+   "feature": "R11 PWM/delta-sigma -> RC -> jack R",
+   "bank": "0",
+   "pio": "PT38B",
+   "dual": "PCLKC0_0",
+   "dqs": "-",
+   "attrs": {}
+  },
   "pmod1[1]": {
-   "ball": "B1",
+   "ball": "C18",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 1 (pair 0 true)",
-   "bank": "7",
-   "pio": "PL2A",
-   "dual": "-",
+   "bank": "2",
+   "pio": "PR11A",
+   "dual": "URC_GPLL0T_IN",
+   "dqs": "RDQ17",
    "attrs": {}
   },
   "pmod1[7]": {
-   "ball": "B2",
+   "ball": "D17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 7 (pair 0 comp)",
-   "bank": "7",
-   "pio": "PL2B",
-   "dual": "-",
+   "bank": "2",
+   "pio": "PR11B",
+   "dual": "URC_GPLL0C_IN",
+   "dqs": "RDQ17",
    "attrs": {}
   },
   "pmod1[2]": {
-   "ball": "C1",
+   "ball": "D18",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 2 (pair 1 true)",
-   "bank": "7",
-   "pio": "PL5A",
+   "bank": "2",
+   "pio": "PR14A",
    "dual": "-",
+   "dqs": "RDQ17",
    "attrs": {}
   },
   "pmod1[8]": {
-   "ball": "C2",
+   "ball": "E17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 8 (pair 1 comp)",
-   "bank": "7",
-   "pio": "PL5B",
+   "bank": "2",
+   "pio": "PR14B",
    "dual": "-",
+   "dqs": "RDQ17",
    "attrs": {}
   },
   "pmod1[3]": {
-   "ball": "D1",
+   "ball": "F17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 3 (pair 2 true)",
-   "bank": "7",
-   "pio": "PL8A",
+   "bank": "2",
+   "pio": "PR17A",
    "dual": "-",
+   "dqs": "RDQS17",
    "attrs": {}
   },
   "pmod1[9]": {
-   "ball": "E2",
+   "ball": "G18",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 9 (pair 2 comp)",
-   "bank": "7",
-   "pio": "PL8B",
+   "bank": "2",
+   "pio": "PR17B",
    "dual": "-",
+   "dqs": "RDQSN17",
    "attrs": {}
   },
   "pmod1[4]": {
-   "ball": "G5",
+   "ball": "H18",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 4 (pair 3 true)",
-   "bank": "7",
-   "pio": "PL11A",
+   "bank": "2",
+   "pio": "PR20A",
    "dual": "-",
+   "dqs": "RDQ17",
    "attrs": {}
   },
   "pmod1[10]": {
-   "ball": "G4",
+   "ball": "H17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD1 pin 10 (pair 3 comp)",
-   "bank": "7",
-   "pio": "PL11B",
+   "bank": "2",
+   "pio": "PR20B",
    "dual": "-",
+   "dqs": "RDQ17",
    "attrs": {}
   },
   "pmod2[1]": {
-   "ball": "L1",
+   "ball": "C20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 1 (pair 0 true)",
-   "bank": "6",
-   "pio": "PL26A",
-   "dual": "PCLKT6_1",
+   "bank": "2",
+   "pio": "PR23A",
+   "dual": "-",
+   "dqs": "RDQ29",
    "attrs": {}
   },
   "pmod2[7]": {
-   "ball": "L2",
+   "ball": "D19",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 7 (pair 0 comp)",
-   "bank": "6",
-   "pio": "PL26B",
-   "dual": "PCLKC6_1",
+   "bank": "2",
+   "pio": "PR23B",
+   "dual": "-",
+   "dqs": "RDQ29",
    "attrs": {}
   },
   "pmod2[2]": {
-   "ball": "K4",
+   "ball": "E20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 2 (pair 1 true)",
-   "bank": "6",
-   "pio": "PL29A",
-   "dual": "GR_PCLK6_0",
+   "bank": "2",
+   "pio": "PR26A",
+   "dual": "-",
+   "dqs": "RDQ29",
    "attrs": {}
   },
   "pmod2[8]": {
-   "ball": "K5",
+   "ball": "F19",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 8 (pair 1 comp)",
-   "bank": "6",
-   "pio": "PL29B",
+   "bank": "2",
+   "pio": "PR26B",
    "dual": "-",
+   "dqs": "RDQ29",
    "attrs": {}
   },
   "pmod2[3]": {
-   "ball": "N1",
+   "ball": "G19",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 3 (pair 2 true)",
-   "bank": "6",
-   "pio": "PL32A",
-   "dual": "-",
+   "bank": "2",
+   "pio": "PR29A",
+   "dual": "GR_PCLK2_1",
+   "dqs": "RDQS29",
    "attrs": {}
   },
   "pmod2[9]": {
-   "ball": "P2",
+   "ball": "H20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 9 (pair 2 comp)",
-   "bank": "6",
-   "pio": "PL32B",
+   "bank": "2",
+   "pio": "PR29B",
    "dual": "-",
+   "dqs": "RDQSN29",
    "attrs": {}
   },
   "pmod2[4]": {
-   "ball": "P1",
+   "ball": "J19",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 4 (pair 3 true)",
-   "bank": "6",
-   "pio": "PL35A",
-   "dual": "-",
+   "bank": "2",
+   "pio": "PR32A",
+   "dual": "PCLKT2_1",
+   "dqs": "RDQ29",
    "attrs": {}
   },
   "pmod2[10]": {
-   "ball": "R1",
+   "ball": "K19",
    "io": "LVCMOS33",
    "feature": "R13 PMOD2 pin 10 (pair 3 comp)",
-   "bank": "6",
-   "pio": "PL35B",
-   "dual": "VREF1_6",
+   "bank": "2",
+   "pio": "PR32B",
+   "dual": "PCLKC2_1",
+   "dqs": "RDQ29",
    "attrs": {}
   },
   "pmod3[1]": {
-   "ball": "B16",
+   "ball": "L20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 1 (pair 0 true)",
-   "bank": "2",
-   "pio": "PR2A",
-   "dual": "-",
+   "bank": "3",
+   "pio": "PR35A",
+   "dual": "PCLKT3_1",
+   "dqs": "RDQ41",
    "attrs": {}
   },
   "pmod3[7]": {
-   "ball": "B15",
+   "ball": "M20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 7 (pair 0 comp)",
-   "bank": "2",
-   "pio": "PR2B",
-   "dual": "S0_IN",
+   "bank": "3",
+   "pio": "PR35B",
+   "dual": "PCLKC3_1",
+   "dqs": "RDQ41",
    "attrs": {}
   },
   "pmod3[2]": {
-   "ball": "C16",
+   "ball": "L16",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 2 (pair 1 true)",
-   "bank": "2",
-   "pio": "PR5A",
-   "dual": "-",
+   "bank": "3",
+   "pio": "PR38A",
+   "dual": "GR_PCLK3_0",
+   "dqs": "RDQ41",
    "attrs": {}
   },
   "pmod3[8]": {
-   "ball": "C15",
+   "ball": "L17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 8 (pair 1 comp)",
-   "bank": "2",
-   "pio": "PR5B",
+   "bank": "3",
+   "pio": "PR38B",
    "dual": "-",
+   "dqs": "RDQ41",
    "attrs": {}
   },
   "pmod3[3]": {
-   "ball": "D16",
+   "ball": "N16",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 3 (pair 2 true)",
-   "bank": "2",
-   "pio": "PR8A",
+   "bank": "3",
+   "pio": "PR41A",
    "dual": "-",
+   "dqs": "RDQS41",
    "attrs": {}
   },
   "pmod3[9]": {
-   "ball": "E15",
+   "ball": "M17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 9 (pair 2 comp)",
-   "bank": "2",
-   "pio": "PR8B",
+   "bank": "3",
+   "pio": "PR41B",
    "dual": "-",
+   "dqs": "RDQSN41",
    "attrs": {}
   },
   "pmod3[4]": {
-   "ball": "G12",
+   "ball": "N17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 4 (pair 3 true)",
-   "bank": "2",
-   "pio": "PR11A",
+   "bank": "3",
+   "pio": "PR44A",
    "dual": "-",
+   "dqs": "RDQ41",
    "attrs": {}
   },
   "pmod3[10]": {
-   "ball": "G13",
+   "ball": "P16",
    "io": "LVCMOS33",
    "feature": "R13 PMOD3 pin 10 (pair 3 comp)",
-   "bank": "2",
-   "pio": "PR11B",
-   "dual": "-",
+   "bank": "3",
+   "pio": "PR44B",
+   "dual": "VREF1_3",
+   "dqs": "RDQ41",
    "attrs": {}
   },
   "pmod4[1]": {
-   "ball": "L16",
+   "ball": "N19",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 1 (pair 0 true)",
    "bank": "3",
-   "pio": "PR26A",
-   "dual": "PCLKT3_1",
+   "pio": "PR59A",
+   "dual": "-",
+   "dqs": "RDQ65",
    "attrs": {}
   },
   "pmod4[7]": {
-   "ball": "L15",
+   "ball": "N20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 7 (pair 0 comp)",
    "bank": "3",
-   "pio": "PR26B",
-   "dual": "PCLKC3_1",
+   "pio": "PR59B",
+   "dual": "-",
+   "dqs": "RDQ65",
    "attrs": {}
   },
   "pmod4[2]": {
-   "ball": "K13",
+   "ball": "P20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 2 (pair 1 true)",
    "bank": "3",
-   "pio": "PR29A",
-   "dual": "GR_PCLK3_0",
+   "pio": "PR62A",
+   "dual": "-",
+   "dqs": "RDQ65",
    "attrs": {}
   },
   "pmod4[8]": {
-   "ball": "K12",
+   "ball": "R20",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 8 (pair 1 comp)",
    "bank": "3",
-   "pio": "PR29B",
+   "pio": "PR62B",
    "dual": "-",
+   "dqs": "RDQ65",
    "attrs": {}
   },
   "pmod4[3]": {
-   "ball": "N16",
+   "ball": "T19",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 3 (pair 2 true)",
    "bank": "3",
-   "pio": "PR32A",
+   "pio": "PR65A",
    "dual": "-",
+   "dqs": "RDQS65",
    "attrs": {}
   },
   "pmod4[9]": {
-   "ball": "P15",
+   "ball": "R18",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 9 (pair 2 comp)",
    "bank": "3",
-   "pio": "PR32B",
+   "pio": "PR65B",
    "dual": "-",
+   "dqs": "RDQSN65",
    "attrs": {}
   },
   "pmod4[4]": {
-   "ball": "P16",
+   "ball": "U18",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 4 (pair 3 true)",
    "bank": "3",
-   "pio": "PR35A",
+   "pio": "PR68A",
    "dual": "-",
+   "dqs": "RDQ65",
    "attrs": {}
   },
   "pmod4[10]": {
-   "ball": "R16",
+   "ball": "U17",
    "io": "LVCMOS33",
    "feature": "R13 PMOD4 pin 10 (pair 3 comp)",
    "bank": "3",
-   "pio": "PR35B",
-   "dual": "VREF1_3",
+   "pio": "PR68B",
+   "dual": "-",
+   "dqs": "RDQ65",
    "attrs": {}
+  },
+  "eth_rx_clk": {
+   "ball": "J20",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII RXC (PCLKT2_0)",
+   "bank": "2",
+   "pio": "PR32C",
+   "dual": "PCLKT2_0",
+   "dqs": "RDQ29",
+   "attrs": {}
+  },
+  "eth_rx_ctl": {
+   "ball": "K20",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII RX_CTL",
+   "bank": "2",
+   "pio": "PR32D",
+   "dual": "PCLKC2_0",
+   "dqs": "RDQ29",
+   "attrs": {}
+  },
+  "eth_rx_data[0]": {
+   "ball": "E16",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII RXD",
+   "bank": "2",
+   "pio": "PR11C",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {}
+  },
+  "eth_rx_data[1]": {
+   "ball": "F16",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII RXD",
+   "bank": "2",
+   "pio": "PR11D",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {}
+  },
+  "eth_rx_data[2]": {
+   "ball": "E18",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII RXD",
+   "bank": "2",
+   "pio": "PR14C",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {}
+  },
+  "eth_rx_data[3]": {
+   "ball": "F18",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII RXD",
+   "bank": "2",
+   "pio": "PR14D",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {}
+  },
+  "eth_tx_clk": {
+   "ball": "G16",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII TXC",
+   "bank": "2",
+   "pio": "PR17C",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {
+    "SLEWRATE": "FAST"
+   }
+  },
+  "eth_tx_ctl": {
+   "ball": "H16",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII TX_CTL",
+   "bank": "2",
+   "pio": "PR17D",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {
+    "SLEWRATE": "FAST"
+   }
+  },
+  "eth_tx_data[0]": {
+   "ball": "J17",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII TXD",
+   "bank": "2",
+   "pio": "PR20C",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {
+    "SLEWRATE": "FAST"
+   }
+  },
+  "eth_tx_data[1]": {
+   "ball": "J16",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII TXD",
+   "bank": "2",
+   "pio": "PR20D",
+   "dual": "-",
+   "dqs": "RDQ17",
+   "attrs": {
+    "SLEWRATE": "FAST"
+   }
+  },
+  "eth_tx_data[2]": {
+   "ball": "D20",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII TXD",
+   "bank": "2",
+   "pio": "PR23C",
+   "dual": "VREF1_2",
+   "dqs": "RDQ29",
+   "attrs": {
+    "SLEWRATE": "FAST"
+   }
+  },
+  "eth_tx_data[3]": {
+   "ball": "E19",
+   "io": "LVCMOS33",
+   "feature": "R27 RGMII TXD",
+   "bank": "2",
+   "pio": "PR23D",
+   "dual": "-",
+   "dqs": "RDQ29",
+   "attrs": {
+    "SLEWRATE": "FAST"
+   }
+  },
+  "eth_mdc": {
+   "ball": "F20",
+   "io": "LVCMOS33",
+   "feature": "R27 PHY MDC",
+   "bank": "2",
+   "pio": "PR26C",
+   "dual": "-",
+   "dqs": "RDQ29",
+   "attrs": {}
+  },
+  "eth_mdio": {
+   "ball": "G20",
+   "io": "LVCMOS33",
+   "feature": "R27 PHY MDIO (1.5k PU)",
+   "bank": "2",
+   "pio": "PR26D",
+   "dual": "-",
+   "dqs": "RDQ29",
+   "attrs": {}
+  },
+  "eth_rst_n": {
+   "ball": "J18",
+   "io": "LVCMOS33",
+   "feature": "R27 PHY reset",
+   "bank": "2",
+   "pio": "PR29C",
+   "dual": "GR_PCLK2_0",
+   "dqs": "RDQ29",
+   "attrs": {}
+  },
+  "eth_int_n": {
+   "ball": "K18",
+   "io": "LVCMOS33",
+   "feature": "R27 PHY interrupt",
+   "bank": "2",
+   "pio": "PR29D",
+   "dual": "-",
+   "dqs": "RDQ29",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "ulpi_clk": {
+   "ball": "L19",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI 60 MHz clock from PHY (PCLKT3_0)",
+   "bank": "3",
+   "pio": "PR35C",
+   "dual": "PCLKT3_0",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_dir": {
+   "ball": "M19",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DIR",
+   "bank": "3",
+   "pio": "PR35D",
+   "dual": "PCLKC3_0",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_nxt": {
+   "ball": "L18",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI NXT",
+   "bank": "3",
+   "pio": "PR38C",
+   "dual": "GR_PCLK3_1",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_stp": {
+   "ball": "M18",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI STP",
+   "bank": "3",
+   "pio": "PR38D",
+   "dual": "-",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_data[0]": {
+   "ball": "N18",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR41C",
+   "dual": "-",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_data[1]": {
+   "ball": "P17",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR41D",
+   "dual": "-",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_data[2]": {
+   "ball": "R16",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR44C",
+   "dual": "-",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_data[3]": {
+   "ball": "R17",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR44D",
+   "dual": "-",
+   "dqs": "RDQ41",
+   "attrs": {}
+  },
+  "ulpi_data[4]": {
+   "ball": "T16",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR53A",
+   "dual": "-",
+   "dqs": "RDQS53",
+   "attrs": {}
+  },
+  "ulpi_data[5]": {
+   "ball": "P19",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR59C",
+   "dual": "-",
+   "dqs": "RDQ65",
+   "attrs": {}
+  },
+  "ulpi_data[6]": {
+   "ball": "P18",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR59D",
+   "dual": "-",
+   "dqs": "RDQ65",
+   "attrs": {}
+  },
+  "ulpi_data[7]": {
+   "ball": "T20",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI DATA",
+   "bank": "3",
+   "pio": "PR62C",
+   "dual": "-",
+   "dqs": "RDQ65",
+   "attrs": {}
+  },
+  "ulpi_rst": {
+   "ball": "U20",
+   "io": "LVCMOS33",
+   "feature": "R29 ULPI PHY reset",
+   "bank": "3",
+   "pio": "PR62D",
+   "dual": "-",
+   "dqs": "RDQ65",
+   "attrs": {}
+  },
+  "sfp_tx_disable": {
+   "ball": "U19",
+   "io": "LVCMOS33",
+   "feature": "R23 SFP TX_DISABLE (PU on module side)",
+   "bank": "3",
+   "pio": "PR65C",
+   "dual": "-",
+   "dqs": "RDQ65",
+   "attrs": {}
+  },
+  "sfp_los": {
+   "ball": "T18",
+   "io": "LVCMOS33",
+   "feature": "R23 SFP LOS (4.7k PU)",
+   "bank": "3",
+   "pio": "PR65D",
+   "dual": "-",
+   "dqs": "RDQ65",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "sfp_mod_abs": {
+   "ball": "U16",
+   "io": "LVCMOS33",
+   "feature": "R23 SFP MOD_ABS (4.7k PU)",
+   "bank": "3",
+   "pio": "PR68C",
+   "dual": "LRC_GPLL0T_IN",
+   "dqs": "RDQ65",
+   "attrs": {
+    "PULLMODE": "UP"
+   }
+  },
+  "sfp_rs": {
+   "ball": "T17",
+   "io": "LVCMOS33",
+   "feature": "R23 SFP rate select",
+   "bank": "3",
+   "pio": "PR68D",
+   "dual": "LRC_GPLL0C_IN",
+   "dqs": "RDQ65",
+   "attrs": {}
+  },
+  "flash_io2": {
+   "ball": "Y2",
+   "io": "LVCMOS33",
+   "feature": "R8 QSPI IO2 (D2)",
+   "bank": "8",
+   "pio": "PB9B",
+   "dual": "D2/IO2",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "flash_io3": {
+   "ball": "W1",
+   "io": "LVCMOS33",
+   "feature": "R8 QSPI IO3 (D3)",
+   "bank": "8",
+   "pio": "PB9A",
+   "dual": "D3/IO3",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "flash_mosi": {
+   "ball": "W2",
+   "io": "LVCMOS33",
+   "feature": "R8 config D0/MOSI",
+   "bank": "8",
+   "pio": "PB11B",
+   "dual": "D0/MOSI/IO0",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "flash_miso": {
+   "ball": "V2",
+   "io": "LVCMOS33",
+   "feature": "R8 config D1/MISO",
+   "bank": "8",
+   "pio": "PB11A",
+   "dual": "D1/MISO/IO1",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "flash_cs_n": {
+   "ball": "R2",
+   "io": "LVCMOS33",
+   "feature": "R8 config CSSPIN (4.7k pull-up at flash)",
+   "bank": "8",
+   "pio": "PB15A",
+   "dual": "HOLDN/DI/BUSY/CSSPIN/CEN",
+   "dqs": "-",
+   "attrs": {}
+  },
+  "ddram_a[0]": {
+   "ball": "P2",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "6",
+   "pio": "PL68B",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_a[1]": {
+   "ball": "C4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL14A",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[2]": {
+   "ball": "E5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL20C",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[3]": {
+   "ball": "F5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL20D",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[4]": {
+   "ball": "B3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL14D",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[5]": {
+   "ball": "F4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL20A",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[6]": {
+   "ball": "B5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL11C",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[7]": {
+   "ball": "E4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL17A",
+   "dual": "-",
+   "dqs": "LDQS17",
+   "attrs": {}
+  },
+  "ddram_a[8]": {
+   "ball": "C5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL11D",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[9]": {
+   "ball": "E3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL20B",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[10]": {
+   "ball": "D5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL17B",
+   "dual": "-",
+   "dqs": "LDQSN17",
+   "attrs": {}
+  },
+  "ddram_a[11]": {
+   "ball": "B4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL14B",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[12]": {
+   "ball": "C3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL17C",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[13]": {
+   "ball": "A3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL14C",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_a[14]": {
+   "ball": "D3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 address A0-A14",
+   "bank": "7",
+   "pio": "PL17D",
+   "dual": "-",
+   "dqs": "LDQ17",
+   "attrs": {}
+  },
+  "ddram_ba[0]": {
+   "ball": "P5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 bank address",
+   "bank": "6",
+   "pio": "PL59D",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_ba[1]": {
+   "ball": "N3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 bank address",
+   "bank": "6",
+   "pio": "PL62A",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_ba[2]": {
+   "ball": "M3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 bank address",
+   "bank": "6",
+   "pio": "PL62B",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_ras_n": {
+   "ball": "P1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 RAS#",
+   "bank": "6",
+   "pio": "PL68A",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_cas_n": {
+   "ball": "L1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 CAS#",
+   "bank": "6",
+   "pio": "PL65C",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_we_n": {
+   "ball": "M1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 WE#",
+   "bank": "6",
+   "pio": "PL65B",
+   "dual": "-",
+   "dqs": "LDQSN65",
+   "attrs": {}
+  },
+  "ddram_cs_n": {
+   "ball": "K1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 CS#",
+   "bank": "6",
+   "pio": "PL41D",
+   "dual": "-",
+   "dqs": "LDQ41",
+   "attrs": {}
+  },
+  "ddram_cke": {
+   "ball": "N2",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 CKE",
+   "bank": "6",
+   "pio": "PL65A",
+   "dual": "-",
+   "dqs": "LDQS65",
+   "attrs": {}
+  },
+  "ddram_odt": {
+   "ball": "L2",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 ODT",
+   "bank": "6",
+   "pio": "PL62D",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_reset_n": {
+   "ball": "N4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 RESET#",
+   "bank": "6",
+   "pio": "PL59C",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_clk_p": {
+   "ball": "M4",
+   "io": "SSTL135D_I",
+   "feature": "R26 DDR3 CK (comp implied)",
+   "bank": "6",
+   "pio": "PL59A",
+   "dual": "-",
+   "dqs": "LDQ65",
+   "attrs": {}
+  },
+  "ddram_dm[0]": {
+   "ball": "J4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DM0/DM1",
+   "bank": "6",
+   "pio": "PL38A",
+   "dual": "GR_PCLK6_0",
+   "dqs": "LDQ41",
+   "attrs": {}
+  },
+  "ddram_dm[1]": {
+   "ball": "H5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DM0/DM1",
+   "bank": "7",
+   "pio": "PL29C",
+   "dual": "GR_PCLK7_0",
+   "dqs": "LDQ29",
+   "attrs": {}
+  },
+  "ddram_dq[0]": {
+   "ball": "L5",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL44D",
+   "dual": "-",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[1]": {
+   "ball": "F1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL35B",
+   "dual": "PCLKC6_1",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[2]": {
+   "ball": "K4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL44A",
+   "dual": "-",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[3]": {
+   "ball": "G1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL35D",
+   "dual": "PCLKC6_0",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[4]": {
+   "ball": "L4",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL44C",
+   "dual": "-",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[5]": {
+   "ball": "H1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL41C",
+   "dual": "-",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[6]": {
+   "ball": "G2",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL35A",
+   "dual": "PCLKT6_1",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[7]": {
+   "ball": "J3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "6",
+   "pio": "PL38C",
+   "dual": "GR_PCLK6_1",
+   "dqs": "LDQ41",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[8]": {
+   "ball": "D1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL26B",
+   "dual": "-",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[9]": {
+   "ball": "C1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL26A",
+   "dual": "-",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[10]": {
+   "ball": "E2",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL32D",
+   "dual": "PCLKC7_0",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[11]": {
+   "ball": "C2",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL23D",
+   "dual": "-",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[12]": {
+   "ball": "F3",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL32B",
+   "dual": "PCLKC7_1",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[13]": {
+   "ball": "A2",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL23A",
+   "dual": "-",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[14]": {
+   "ball": "E1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL26D",
+   "dual": "-",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dq[15]": {
+   "ball": "B1",
+   "io": "SSTL135_I",
+   "feature": "R26 DDR3 DQ",
+   "bank": "7",
+   "pio": "PL23B",
+   "dual": "-",
+   "dqs": "LDQ29",
+   "attrs": {
+    "TERMINATION": "75"
+   }
+  },
+  "ddram_dqs_p[0]": {
+   "ball": "K2",
+   "io": "SSTL135D_I",
+   "feature": "R26 DDR3 DQS (comp implied)",
+   "bank": "6",
+   "pio": "PL41A",
+   "dual": "-",
+   "dqs": "LDQS41",
+   "attrs": {
+    "TERMINATION": "OFF",
+    "DIFFRESISTOR": "100"
+   }
+  },
+  "ddram_dqs_p[1]": {
+   "ball": "H4",
+   "io": "SSTL135D_I",
+   "feature": "R26 DDR3 DQS (comp implied)",
+   "bank": "7",
+   "pio": "PL29A",
+   "dual": "GR_PCLK7_1",
+   "dqs": "LDQS29",
+   "attrs": {
+    "TERMINATION": "OFF",
+    "DIFFRESISTOR": "100"
+   }
   }
  },
  "pmods": {
   "1": {
-   "bank": "7",
+   "bank": "2",
    "pairs": [
     [
-     "B1",
-     "B2"
+     "C18",
+     "D17"
     ],
     [
-     "C1",
-     "C2"
+     "D18",
+     "E17"
     ],
     [
-     "D1",
-     "E2"
+     "F17",
+     "G18"
     ],
     [
-     "G5",
-     "G4"
+     "H18",
+     "H17"
     ]
    ]
   },
   "2": {
-   "bank": "6",
+   "bank": "2",
    "pairs": [
     [
-     "L1",
-     "L2"
+     "C20",
+     "D19"
     ],
     [
-     "K4",
-     "K5"
+     "E20",
+     "F19"
     ],
     [
-     "N1",
-     "P2"
+     "G19",
+     "H20"
     ],
     [
-     "P1",
-     "R1"
+     "J19",
+     "K19"
     ]
    ]
   },
   "3": {
-   "bank": "2",
+   "bank": "3",
    "pairs": [
     [
-     "B16",
-     "B15"
+     "L20",
+     "M20"
     ],
     [
-     "C16",
-     "C15"
+     "L16",
+     "L17"
     ],
     [
-     "D16",
-     "E15"
+     "N16",
+     "M17"
     ],
     [
-     "G12",
-     "G13"
+     "N17",
+     "P16"
     ]
    ]
   },
@@ -903,20 +1977,20 @@
    "bank": "3",
    "pairs": [
     [
-     "L16",
-     "L15"
+     "N19",
+     "N20"
     ],
     [
-     "K13",
-     "K12"
+     "P20",
+     "R20"
     ],
     [
-     "N16",
-     "P15"
+     "T19",
+     "R18"
     ],
     [
-     "P16",
-     "R16"
+     "U18",
+     "U17"
     ]
    ]
   }

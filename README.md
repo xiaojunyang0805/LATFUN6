@@ -31,17 +31,19 @@ docs/definition.md                    board definition: requirements -> labs, po
 hardware/latfun6/latfun6_worknote.md  schematic worknote (blocks, parts with LCSC numbers, net map, gates)
 hardware/latfun6/board/latfun6.json   machine-readable pinout (single source of truth)
 hardware/latfun6/board/latfun6.lpf    generated constraints file
-hardware/latfun6/tools/gen_board.py   pinout generator + validator (against Lattice's pinout CSV)
+hardware/latfun6/board/latfun6_platform.py  generated LiteX platform
+hardware/latfun6/tools/gen_board.py   pinout generator + validator (against Lattice's ECP5-5G pinout CSVs)
 hardware/latfun6/tools/lcsc_stock_check.py  JLCPCB part availability check
-hardware/latfun6/test/                pinout smoke test (Yosys + nextpnr-ecp5 on 25k and 45k)
+hardware/latfun6/test/                P&R proofs: LiteX DDR3+Ethernet SoC, all-I/O smoke (UM5G-45F and -85F)
 ```
 
 ### Regenerate and check the pinout
 
 ```sh
-# download "ECP5U-25 Pinout" (and optionally ECP5U-45) CSVs from latticesemi.com (see gen_board.py)
-python hardware/latfun6/tools/gen_board.py ECP5U-25.csv ECP5U-45.csv
-sh hardware/latfun6/test/run_smoke.sh      # needs OSS CAD Suite
+# download the "ECP5-5G-45" and "ECP5-5G-85" pinout CSVs from latticesemi.com (see gen_board.py)
+python hardware/latfun6/tools/gen_board.py ECP5-5G-45.csv ECP5-5G-85.csv
+python hardware/latfun6/test/make_io_smoke.py   # all non-DDR I/O, needs OSS CAD Suite
+python hardware/latfun6/test/litex_smoke.py     # DDR3 + Ethernet SoC, needs LiteX
 ```
 
 ## Licences
