@@ -15,7 +15,7 @@ P2.update({'R30': ('PROGRAMN', '3V3'), 'R31': ('INITN', '3V3'), 'R32': ('DONE', 
            'R34': ('CCLK', 'FLASH_CLK'), 'R35': ('CFG1', '3V3'), 'R36': ('JTAG_TDI', '3V3'), 'R37': ('JTAG_TMS', '3V3'),
            'R38': ('JTAG_TDO', '3V3'), 'R39': ('JTAG_TCK', G), 'R40': ('DONE_LED_G', G), 'R41': ('3V3', 'DONE_LED_A'),
            'R42': ('DONE', 'DONE_LED_G'), 'C59': ('PROGRAMN', G)})
-BYNAME.update({'D3': {'A': 'DONE_LED_A', 'K': 'DONE_LED_K', '1': 'DONE_LED_A', '2': 'DONE_LED_K'},
+BYNAME.update({'D3': {'A': 'DONE_LED_A', 'K': 'DONE_LED_K'},
                'Q1': {'D': 'DONE_LED_K', 'G': 'DONE_LED_G', 'S': G},
                'SW1': {'A': 'PROGRAMN', 'B': 'PROGRAMN', 'C': G, 'D': G},          # ✱ 1-2 / 3-4 internally joined
                'X1': {'OE/NC': '3V3_OSC', 'GND': G, 'OUT': 'CLK_25MHZ', 'VDD': '3V3_OSC'}})
@@ -45,7 +45,7 @@ BYNAME['J2'] = {'1': 'JTAG_TCK', '2': 'JTAG_TDI', '3': 'JTAG_TDO', '4': 'JTAG_TM
 
 # ---------------- B5: user I/O, I2C EEPROM, audio ----------------
 for i in range(8):
-    BYNAME[f'D{10 + i}'] = {'A': f'LED{i}_A', 'K': G, '1': f'LED{i}_A', '2': G}
+    BYNAME[f'D{10 + i}'] = {'A': f'LED{i}_A', 'K': G}  # XL-0603QYGC: pin 1 = K, pin 2 = A
     P2[f'R{100 + i}'] = (f'LED{i}', f'LED{i}_A')
 for i in range(4):
     BYNAME[f'SW{2 + i}'] = {'A': f'BTN_N{i}', 'B': f'BTN_N{i}', 'C': G, 'D': G}

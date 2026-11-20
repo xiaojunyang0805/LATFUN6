@@ -44,6 +44,19 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **Gates C3 / C4 / D, 2026-11-20 (live netlist via `sch_get_netlist`, JLCEDA format; scripts `tools/schematic/c3c4.py`, `c4_boardfile.py`).**
+> - **C3, PASS:**
+>   - 451 parts and 367 nets; 0 auto-nets (`$…`); 0 single-pin nets.
+>   - All 1,789 mapped pins carry the planned net in the live netlist. No pin carries a net that isn't in the map. All 131 empty pins are declared NC.
+>   - No two-terminal part has both legs on one net.
+>   - 15 capacitors have no ground leg, all intentional: feed-forward (C21, C227), audio DC block (C142, C145), LM74700 VCAP (C200, C202), buck bootstrap (C207), PCIe REFCLK/TX and SMA AC coupling (C320–C323, C340–C343).
+>   - Found and fixed in the record only: the D3/D10–D17 entries also keyed pins by number with pin 1 as the anode. On XL-0603QYGC pin 1 is K; the canvas was right and the map was wrong.
+> - **C4, PASS:**
+>   - All 175 signals in `board/latfun6.json` sit on their U5 ball with the board-file name, and every one reaches a non-FPGA part. All 34 dedicated FPGA nets (config, JTAG, VREF, SERDES, rails) reach the board.
+>   - SFP lanes go through 0 Ω R310–R313 to J13 18/19 (TD±) and 13/12 (RD±), per the SFP MSA; the module AC-couples internally. PCIe: card RX (A16/A17) is direct, because the host AC-couples it; card TX goes through C322/C323.
+>   - Of the 72 names in Section 3, only CFG0/CFG2 are absent, by design (tied straight to GND, no named net). ✱ Section 3 itself is still the v0.1 table (BG256 balls) and should be regenerated for v0.2. The board file plus `tools/schematic/netmap_*.py` are the authoritative record meanwhile.
+> - **D, PASS:** schematic DRC clean in EasyEDA Pro (confirmed by the user).
+
 > **Gate A2 datasheet fixes, 2026-11-20.** Every assumed pin order and open ✱ item was checked against the datasheet (PDFs via the JLCPCB parts API).
 > - **J19 HR911130C (fixed, 2 errors):** P10 is the chassis side of the internal 1 nF/2 kV Bob-Smith cap, so it now goes to GND instead of ETH_CT. The yellow LED is 14 = anode / 13 = cathode (it was reversed and would never light): 14 → 3V3, 13 → ETH_LED1_K → R364 → PHY, matching the green LED (11 → 3V3, 12 → ETH_LED0_K → R363). P1 = chip-side centre tap → ETH_CT + C381 ✔.
 > - **J4 PJ-313D (fixed):** the footprint has pad 1 = A (sleeve), 2 = B (ring), 3 = C (tip), per the 3.2/3.5 mm pitch. Tip = left channel, so pad 3 → JACK_L and pad 2 → JACK_R (they were swapped).
