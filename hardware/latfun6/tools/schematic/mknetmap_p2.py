@@ -14,7 +14,7 @@ for pk,nk in (('ddram_clk_p','DDRAM_CLK_N'),('ddram_dqs_p[0]','DDRAM_DQS_N0'),('
     comp=[n for n,nm in names.items() if f'Comp_OF_{tru}' in nm][0]
     ball2net[comp]=nk
 ball2net.update({'B2':'FPGA_VREF7','K5':'FPGA_VREF6'})
-fixed={'VCC':'1V2','VCCAUX':'VCCAUX','VCCAUXA0':'VCCAUX','VCCAUXA1':'VCCAUX','VCCA0':'1V2_SER','VCCA1':'1V2_SER',
+fixed={'VCC':'1V2','VCCAUX':'VCCAUX','VCCAUXA0':'VCCAUXA','VCCAUXA1':'VCCAUXA','VCCA0':'1V2_SER','VCCA1':'1V2_SER',
        'VCCIO0':'3V3','VCCIO1':'3V3','VCCIO2':'3V3','VCCIO3':'3V3','VCCIO8':'3V3','VCCIO6':'1V35','VCCIO7':'1V35','GND':'GND',
        'CFG_0':'GND','CFG_1':'CFG1','CFG_2':'GND','DONE':'DONE','PROGRAMN':'PROGRAMN','CCLK':'CCLK','INITN':'INITN',
        'TMS':'JTAG_TMS','TDI':'JTAG_TDI','TCK':'JTAG_TCK','TDO':'JTAG_TDO',

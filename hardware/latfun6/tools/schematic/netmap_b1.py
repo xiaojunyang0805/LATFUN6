@@ -58,3 +58,9 @@ BYNAME = {  # parts mapped by pin name (diodes, ICs, FETs, connectors)
     'U4': {'IN': '3V3', 'EN': '3V3', 'GND': G, 'OUT': '2V5_PRE'},    # NC pin: NC
 }
 NC = {'U22': ['PG'], 'U2': ['PG'], 'U3': ['PG'], 'U26': ['PG'], 'U4': ['NC'], 'J1': ['SBU1', 'SBU2']}
+
+# --- A2 fixes 2026-11-20: VCCA (1V2_SER) must be up before VCCAUXA (2V5) -> 2V5 LDO enabled by U26 PG
+BYNAME['U26']['PG'] = 'EN_2V5'; NC['U26'] = []
+BYNAME['U4']['EN'] = 'EN_2V5'
+P2 = dict(P2) if not isinstance(P2, dict) else P2
+P2['R450'] = ('EN_2V5', '3V3')          # 100k PG pull-up (TPS7A91 PG is open drain)

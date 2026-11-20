@@ -194,3 +194,16 @@ P2['J10'] = ('LOOP_A', 'LOOP_B')
 for i, n in enumerate(['CLK_25MHZ', 'BTN_N0', 'UART_TX', 'UART_RX', 'I2C_SCL', 'I2C_SDA', 'FLASH_CLK', 'FLASH_CS_N',
                        'TP_PLL', 'DONE', 'INITN', 'PWR_ST'], 1):
     BYNAME[f'TP{i}'] = {'1': n}
+
+# --- A2 fixes 2026-11-20 (datasheet checks)
+BYNAME['J4'] = {'1': G, '2': 'JACK_R', '3': 'JACK_L'}         # PJ-313D: pad1=A sleeve, pad2=B ring, pad3=C tip
+BYNAME['J19'].update({'P10': G, '14': '3V3', '13': 'ETH_LED1_K'})  # HR911130C: P10 = chassis side of 1nF/2kV; yellow LED 14 anode, 13 cathode
+P2['R364'] = ('ETH_LED1', 'ETH_LED1_K')
+# extra FPGA decoupling (B3) and SERDES aux rail
+for i in range(450, 454): P2[f'C{i}'] = ('1V2', G)
+for i in (454, 455): P2[f'C{i}'] = ('VCCAUX', G)
+for i in range(456, 459): P2[f'C{i}'] = ('3V3', G)
+for i in (459, 460): P2[f'C{i}'] = ('1V35', G)
+P2['FB20'] = ('2V5', 'VCCAUXA')
+for i in range(461, 466): P2[f'C{i}'] = ('VCCAUXA', G)
+for i in range(466, 479): P2[f'C{i}'] = ('1V2_SER', G)
