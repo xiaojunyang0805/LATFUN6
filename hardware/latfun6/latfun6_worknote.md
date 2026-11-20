@@ -22,7 +22,10 @@
 > - **PCIe:** C320/C321 slot REFCLK AC caps (CDCE inputs must be AC-coupled); C322/C323 100 nF TX caps; R304 10 k PERST# pull-up (bench); R305 0 Ω CLKREQ#→GND (DNP option).
 > - **SFP:** J13 TE 1888247-1 and J14 cage 2227302-1 (LCSC stock 0: consign); R310–R313 0 Ω data links; L30/L31 4.7 µH with C330–C335 VccT/VccR filters; R320–R324 4.7 k pull-ups on TX_FAULT, LOS, MOD_ABS, SCL, SDA.
 > - **SMA:** J15–J18 Molex 73251-1150 and C340–C343 100 nF on TX and RX (DCU1 CH1).
-> - **Still missing: J12, the PCIe x4 card edge.** No device exists in the EasyEDA library, and the MCP cannot create symbols or footprints. KiCad's `Bus_PCI_Express_x4` symbol (64 pins) and `BUS_PCIexpress_x4` footprint (64 pads) are downloaded to `hardware/EDA/import/` for the user to import (EasyEDA Pro: File → Import → KiCad) as a project device.
+> - **J12 PCIe x4 edge placed (2026-11-20)** at (4385, 2530), uid gge7064. Device `Bus_PCI_Express_x4` was imported from KiCad (zip → Extract Libraries → project library) and placed by the user. Its 64 pins match the CEM x4 pinout: A1 PRSNT1#, A11 PERST#, A13/A14 REFCLK±, A16/A17 PERp/n0 (card RX), B14/B15 PETp/n0 (card TX: FPGA HDTX → C322/C323 → B14/B15), B17 and B31 PRSNT2#, B12 RSVD (= CLKREQ# in later CEM revisions).
+>   - ⚠ The KiCad symbol stacks all GND (21), +12V (5) and +3.3V (3) pins at one point each; confirm in the C3 netlist that each stack joins one net.
+>   - ⚠ **The device's Footprint field is empty**: bind `BUS_PCIexpress_x4` to it. Untick 'Add into BOM', because the fingers are PCB copper and not a purchased part.
+> - (history) Missing until now: J12, the PCIe x4 card edge. No device exists in the EasyEDA library, and the MCP cannot create symbols or footprints. KiCad's `Bus_PCI_Express_x4` symbol (64 pins) and `BUS_PCIexpress_x4` footprint (64 pads) are downloaded to `hardware/EDA/import/` for the user to import (EasyEDA Pro: File → Import → KiCad) as a project device.
 
 **Date started:** 2026-11-20
 **Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
