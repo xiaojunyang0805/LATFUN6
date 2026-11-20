@@ -9,3 +9,7 @@ __pycache__/
 docs/handoff-LATFUN6.md
 docs/ulx3s-study.md
 notes/
+
+# EasyEDA project files are local until reviewed (never publish a file derived from another project)
+hardware/EDA/
+*.eprj

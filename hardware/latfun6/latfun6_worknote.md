@@ -3,7 +3,7 @@
 **Project:** LATFUN6, the open ECP5 textbook board for the Open FPGA Tutorial
 **Board:** latfun6 rev v0.1
 **Date started:** 2026-11-20
-**Status:** **S1** (worknote drafted; quality checklist below partly open), not yet in EasyEDA
+**Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
 **Design spec:** `docs/definition.md`
 **Pinout source of truth:** `board/latfun6.json` (generated + validated by `tools/gen_board.py` against the Lattice CSV; P&R-proven by `test/run_smoke.sh` on 25k and 45k)
 **Reference designs (Gate A2 inputs):**
@@ -29,7 +29,16 @@ Status flags used below: ✔ verified C-number + stock (JLCPCB API, 2026-11-20) 
 | H | Audio out | J4, R140–R143, C140–C145 |
 | I | Expansion + verification headers | J5–J8 (PMOD1–4), J9 (LA), J10 (loopback), TP_* signal test points |
 
-Three A3 pages (max 5 frames each): **P1** = A, B, E · **P2** = C, D · **P3** = F, G, H, I.
+**Single page (p1)**: blocks occupy canvas regions; the A3 frame is cosmetic (enlarge to A1 later if wanted). Title-block corner (x > 2700, y < 300) kept clear. Creation coordinates (y up):
+
+| Region | Blocks | x range | y range |
+|---|---|---|---|
+| R1 | U5 (9 sub-parts) | 100–1450 | 140–1030 |
+| R2 | C support: decoupling, config/JTAG resistors, X1, DONE LED, SW1 | 100–1450 | 1150–1550 |
+| R3 | A + B: USB-C entry, regulators, shunts | 100–1450 | 1650–2250 |
+| R4 | D flash + E FT2232H, J2 | 1600–2550 | 1150–2250 |
+| R5 | F user I/O + EEPROM, H audio | 1600–2550 | 140–1030 |
+| R6 | G HDMI, I PMOD/LA/loopback/TPs | 2650–3250 | 400–2250 |
 
 ### Signal flow
 
@@ -52,7 +61,7 @@ U5 bank 7/6/2/3 ─ PMOD1/2/3/4 (J5–J8), A/B diff pairs, pin k ↔ pin k+6
 ```
 5V_SYS  → U2.VIN, U3.VIN, U13.IN, (FT2232H none), TP_5V
 3V3     → VCCIO0/1/2/3/6/7/8 (13 balls), U7 VREGIN/VCCIO/VPHY/VPLL, U6, U8, U9, U12.VREF1, X1, LEDs, pull-ups, PMOD pin 6/12, LA, U4.IN
-1V1     → U5 VCC (6 balls) via FB3
+1V1     → U5 VCC (6 balls), direct (no bead)
 2V5     → U5 VCCAUX (2 balls) via FB2
 5V_HDMI → J3.18, U12 side-2 pull-ups, HPD divider
 1V8_FT  → U7 VCORE (from U7 VREGOUT, internal)
@@ -70,19 +79,18 @@ U5 bank 7/6/2/3 ─ PMOD1/2/3/4 (J5–J8), A/B diff pairs, pin k ↔ pin k+6
 |---|---|---|---|---|---|---|
 | R1 | 5.1 kΩ 1 % | 0402 | C25905 ✔ BASIC | CC1 sink Rd | CC1 | GND |
 | R2 | 5.1 kΩ 1 % | 0402 | C25905 ✔ | CC2 sink Rd | CC2 | GND |
-| F1 | PTC 1.1 A hold, 8 V | 1206 | C126818 ✔ EXT | VBUS overcurrent | VBUS | VBUS_F |
-| D1 | SMF5.0A TVS | SOD-123F | C193402 ✔ EXT | VBUS clamp (cathode=5V_SYS) | 5V_SYS (K) | GND (A) |
+| F1 | PTC 1.1 A hold, 8 V | 1206 | C126818 ✔ EXT | VBUS overcurrent | VBUS | 5V_SYS |
+| D1 | SMF5.0A TVS (Ir 400 µA @ 5 V, accepted) | SOD-123FL | C193402 ✔ EXT | VBUS clamp | 5V_SYS (C, pin 1) | GND (A, pin 2) |
 | C1 | 22 µF 25 V | 0805 | C45783 ✔ BASIC | 5V bulk | 5V_SYS | GND |
 | C2 | 100 nF | 0402 | C1525 ✔ BASIC | 5V HF | 5V_SYS | GND |
-| C3 | 100 µF 6.3 V | 1206 | C15008 ✔ BASIC | bulk for load steps | 5V_SYS | GND |
-| R3 | 0 Ω ⚠ | 0603 | — | VBUS_F → 5V_SYS link (place for a future reverse-current FET) | VBUS_F | 5V_SYS |
+| ~~C3~~ | **removed**: 6.3 V rating on a 5 V rail (TN-02038 §3.5.2 wants ≥ 80 % headroom) and USB VBUS inrush guideline (≤ 10 µF at attach). Bucks have their own 10 µF CIN | — | — | — | — | — |
 
 | Desig | Value | Pkg | LCSC | Function |
 |---|---|---|---|---|
 | U1 | USBLC6-2SC6 | SOT-23-6 | C2687116 ✔ EXT | USB D+/D- ESD |
 | J1 | TYPE-C-31-M-12 (16P, USB2) | SMD | C165948 ✔ EXT | Power + USB2 |
 
-⚠ **Reverse current:** the only external 5 V sources are a monitor's HDMI pin 18 (blocked by U13's reverse-blocking) and PMOD 3V3 pins (an output). A PTC + TVS is proposed. Decide at A2 whether an ideal-diode/FET in place of R3 is needed.
+✅ **Reverse current (decided 2026-11-20):** no on-board path back-feeds VBUS. HDMI pin 18 is driven through U13 (reverse-blocking) and the PMOD 3V3 pins are outputs. ⇒ PTC + TVS only; R3 placeholder deleted.
 
 ### Block B — Regulators and rail sensing
 
@@ -93,18 +101,18 @@ U5 bank 7/6/2/3 ─ PMOD1/2/3/4 (J5–J8), A/B diff pairs, pin k ↔ pin k+6
 | C10, C11 | 10 µF 10 V | 0603 | C19702 ✔ BASIC | U2/U3 input | 5V_SYS | GND |
 | C12, C13 | 22 µF 25 V | 0805 | C45783 ✔ | U2 output | 3V3_PRE | GND |
 | C14, C15 | 22 µF 25 V | 0805 | C45783 ✔ | U3 output | 1V1_PRE | GND |
-| R10 | 680 kΩ 1 % ✱ | 0402 | C4131 ✔ EXT | U2 FB top | 3V3_PRE | FB_3V3 |
+| R10 | 680 kΩ 1 % ✱ | 0402 | C4131 ✔ EXT | U2 FB top, **sensed after RS1** (shunt drop regulated out) | 3V3 | FB_3V3 |
 | R11 | 150 kΩ 1 % ✱ | 0402 | C25755 ✔ EXT | U2 FB bottom (→ 3.32 V nominal) | FB_3V3 | GND |
-| R12 | 100 kΩ 1 % ✱ | 0402 | C25741 ✔ BASIC | U3 FB top | 1V1_PRE | FB_1V1 |
+| R12 | 100 kΩ 1 % ✱ | 0402 | C25741 ✔ BASIC | U3 FB top, **sensed after RS2** (50 mV at 1 A otherwise) | 1V1 | FB_1V1 |
 | R13 | 120 kΩ 1 % ✱ | 0402 | C25750 ✔ EXT | U3 FB bottom (→ 1.100 V nominal; 1 % worst case 1.090–1.110 V) | FB_1V1 | GND |
 | R14 | 100 kΩ | 0402 | C25741 ✔ | U3 EN from 3V3 (sequencing) | 3V3 | EN_1V1 |
 | C16 | 100 nF | 0402 | C1525 ✔ | U3 EN delay | EN_1V1 | GND |
 | C17 | 1 µF 25 V | 0402 | C52923 ✔ BASIC | U4 input | 3V3 | GND |
 | C18 | 1 µF 25 V | 0402 | C52923 ✔ | U4 output | 2V5_PRE | GND |
 | RS1 | 50 mΩ 1 % | 0805 | C247602 ✔ EXT | 3V3 shunt (Lab 17.3) | 3V3_PRE | 3V3 |
-| RS2 | 50 mΩ 1 % | 0805 | C247602 ✔ | 1V1 shunt | 1V1_PRE | 1V1 |
-| RS3 | 50 mΩ 1 % ✱ (0.5 Ω? low current) | 0805 | C247602 ✔ | 2V5 shunt | 2V5_PRE | 2V5 |
-| D2 | LED red | 0603 | C2286 ✔ BASIC | Power LED (A=3V3 side) | PWR_LED (A) | GND (K) |
+| RS2 | **100 mΩ 1 % alloy, 250 mW** (RL10FTNR100) | 0805 | C160917 ✔ EXT | 1V1 shunt: 7.7 mV at the 77 mA static ICC (DS-02012 T3.8); drop is regulated out (FB after shunt) | 1V1_PRE | 1V1 |
+| RS3 | **1 Ω 1 %** | 0603 | C22936 ✔ BASIC | 2V5 shunt: 16 mV at the 16 mA static ICCAUX; ≤ 2 % drop at 50 mA, within VCCAUX ±5 % with the LDO's ±1.5 % | 2V5_PRE | 2V5 |
+| D2 | LED red KT-0603R (**pin 1 = A, pin 2 = K**) | 0603 | C2286 ✔ BASIC | Power LED | PWR_LED (A, pin 1) | GND (K, pin 2) |
 | R15 | 1 kΩ | 0402 | C11702 ✔ BASIC | Power LED | 3V3 | PWR_LED |
 
 | Desig | Value | Pkg | LCSC | Function |
@@ -119,10 +127,10 @@ Test points: TP_5V, TP_3V3, TP_1V1, TP_2V5, plus Kelvin pairs across each shunt:
 
 | Desig | Value | Pkg | LCSC | Function | Pin1 Net | Pin2 Net |
 |---|---|---|---|---|---|---|
-| FB2 | 600 Ω @ 100 MHz | 0603 | C1002 ✔ BASIC | VCCAUX filter (TN-02038 Fig 3.1) | 2V5 | VCCAUX |
-| FB3 | 600 Ω @ 100 MHz ✱ (DC current ≥ 1 A needed, check C1002 rating, else 0805 bead) | 0603 | C1002 ✔ | VCC filter | 1V1 | VCC_CORE |
-| C30–C35 | 100 nF | 0402 | C1525 ✔ | VCC balls G6 G7 G9 L8 L9 L10 | VCC_CORE | GND |
-| C36, C37 | 10 µF | 0603 | C19702 ✔ | VCC bulk | VCC_CORE | GND |
+| FB2 | BLM18PG221SN1D 220 Ω @ 100 MHz, 1.4 A, 0.1 Ω | 0603 | C80165 ✔ EXT | VCCAUX filter (TN-02038 Fig 3.1 shows a bead on VCCAUX only) | 2V5 | VCCAUX |
+| ~~FB3~~ | **removed**: TN-02038 Fig 3.1 has no bead on VCC; C1002 is rated 200 mA and a 1.3 A bead drops 150 mV at 1 A. VCC balls connect to 1V1 directly | — | — | — | — | — |
+| C30–C35 | 100 nF | 0402 | C1525 ✔ | VCC balls G6 G7 G9 L8 L9 L10 | 1V1 | GND |
+| C36, C37 | 10 µF | 0603 | C19702 ✔ | VCC bulk | 1V1 | GND |
 | C38, C39 | 100 nF | 0402 | C1525 ✔ | VCCAUX balls G11, L7 | VCCAUX | GND |
 | C40 | 10 µF | 0603 | C19702 ✔ | VCCAUX bulk | VCCAUX | GND |
 | C41–C53 | 100 nF | 0402 | C1525 ✔ | VCCIO balls F6 F7 F10 F11 H11 J11 K11 L11 J6 J7 H6 H7 L6 | 3V3 | GND |
@@ -143,7 +151,7 @@ Test points: TP_5V, TP_3V3, TP_1V1, TP_2V5, plus Kelvin pairs across each shunt:
 | R40 | 10 kΩ | 0402 | C25744 ✔ BASIC | Q1 gate pull-down | DONE_LED_G | GND |
 | R41 | 1 kΩ | 0402 | C11702 ✔ | DONE LED current | 3V3 | DONE_LED_A |
 | R42 | 0 Ω | 0402 | C17168 ✔ BASIC | DONE → Q1 gate | DONE | DONE_LED_G |
-| D3 | LED green | 0603 | C12624 ✔ EXT | DONE LED (A=DONE_LED_A) | DONE_LED_A (A) | DONE_LED_K (K) |
+| D3 | LED yellow-green KT-0603YG (Vf 2.0–2.2 V) | 0603 | C2289 ✔ EXT | DONE LED (A=DONE_LED_A) | DONE_LED_A (A) | DONE_LED_K (K) |
 | C59 | 100 nF ✱ (optional) | 0402 | C1525 | PROGRAMN button debounce | PROGRAMN | GND |
 
 | Desig | Value | Pkg | LCSC | Function |
@@ -153,7 +161,7 @@ Test points: TP_5V, TP_3V3, TP_1V1, TP_2V5, plus Kelvin pairs across each shunt:
 | Q1 | BSS138 | SOT-23 | C40912 ✔ EXT | DONE LED driver (D=DONE_LED_K, S=GND) |
 | SW1 | TS-1187A-B-A-B | SMD 5.1 mm | C318884 ✔ BASIC | PROGRAMN (reload from flash) |
 
-⚠ **E7 caught:** C9006 (first candidate for X1) is a **passive crystal** (YSX321SL 12 pF), not an oscillator. Rejected.
+⚠ **E7 caught (library descriptions, S3):** C1002 bead is 200 mA (kept only for X1 / FT2232H PLL filters FB4, FB5). C12624 green LED has Vf 3.1 V (≈0.2 mA at 3.3 V/1 kΩ) → replaced by C2289. C9006 (first candidate for X1) is a **passive crystal** (YSX321SL 12 pF), not an oscillator. Rejected.
 
 **U5 dedicated/power ball map** (from the Lattice CSV, CABGA256):
 VCC G6 G7 G9 L8 L9 L10 · VCCAUX G11 L7 · VCCIO0 F6 F7 · VCCIO1 F10 F11 · VCCIO2 H11 J11 · VCCIO3 K11 L11 · VCCIO6 J6 J7 · VCCIO7 H6 H7 · VCCIO8 L6 · GND (27) A1 A16 D2 D15 F8 F9 G8 G10 H1 H8 H9 H10 H16 J8 J9 J10 K6 K7 K8 K9 K10 N2 N15 T1 T5 T12 T16 · CCLK N9 · CFG0 N10 · CFG1 P10 · CFG2 R10 · DONE P9 · INITN T9 · PROGRAMN R9 · TCK T10 · TDI R11 · TDO M10 · TMS T11.
@@ -174,6 +182,32 @@ User I/O: 80 balls per `board/latfun6.lpf`. The remaining 113 I/O are unconnecte
 
 ### Block E — FT2232H USB JTAG + UART, external JTAG
 
+Values per **DS_FT2232H v2.9** Fig 6.1 (bus-powered example), §6.3 (oscillator), §5 (REF, RESET#, VREGIN). Our 3V3 rail plays the role of the figure's LDO output.
+
+| Desig | Value | Pkg | LCSC | Function | Pin1 Net | Pin2 Net |
+|---|---|---|---|---|---|---|
+| R70 | 12 kΩ 1 % | 0402 | C25752 ✔ BASIC | REF to GND (DS §5: "12 K between REF and GND") | FT_REF | GND |
+| R71 | 10 kΩ | 0402 | C25744 ✔ | RESET# to VCCIO (DS: "tied to VCCIO if not used") | FT_RESET_N | 3V3 |
+| R72 | 10 kΩ | 0402 | C25744 ✔ | EECS pull-up (Fig 6.1) | FT_EECS | 3V3 |
+| R73 | 10 kΩ | 0402 | C25744 ✔ | EECLK pull-up (Fig 6.1) | FT_EECLK | 3V3 |
+| R74 | 2.2 kΩ | 0402 | C25879 ✔ BASIC | EEDATA → EEPROM DO (Fig 6.1); EEPROM DI connects to EEDATA directly | FT_EEDATA | EE_DO |
+| R75 | 10 kΩ | 0402 | C25744 ✔ | EEDATA pull-up (Fig 6.1) | FT_EEDATA | 3V3 |
+| R76–R79 | 33 Ω | 0402 | C25105 ✔ | JTAG series (design choice, damping + contention limit): AD0→TCK, AD1→TDI, TDO→AD2, AD3→TMS | FT_AD0..3 | JTAG_TCK/TDI/TDO/TMS |
+| R80–R81 | 33 Ω | 0402 | C25105 ✔ | UART series: BD1 RXD ← UART_TX, BD0 TXD → UART_RX | FT_BD1 / FT_BD0 | UART_TX / UART_RX |
+| R82–R83 | 33 Ω | 0402 | C25105 ✔ | BD2 RTS# → UART_CTS_N, BD3 CTS# ← UART_RTS_N | FT_BD2 / FT_BD3 | UART_CTS_N / UART_RTS_N |
+| C70, C71 | 27 pF C0G | 0402 | C1557 ✔ EXT | Y1 load caps (DS §6.3: 27 pF; crystal CL 20 pF ⇒ 2·(20−~6) ≈ 28 pF ✔) | FT_OSCI / FT_OSCO | GND |
+| C72 | 100 nF | 0402 | C1525 ✔ | VREGIN (pin 50) HF | 3V3 | GND |
+| C81 | 4.7 µF | 0603 | C19666 ✔ BASIC | VREGIN bulk (DS §5 "add an external filtering capacitor") | 3V3 | GND |
+| C80 | 3.3 µF | 0603 | C51412 ✔ EXT | VREGOUT (pin 49), as Fig 6.1 | 1V8_FT | GND |
+| C73–C75 | 100 nF | 0402 | C1525 ✔ | VCORE pins 12, 37, 64 (fed from VREGOUT) | 1V8_FT | GND |
+| C76–C79 | 100 nF | 0402 | C1525 ✔ | VCCIO pins 20, 31, 42, 56 | 3V3 | GND |
+| FB4 | 600 Ω @ 100 MHz (200 mA OK here) | 0603 | C1002 ✔ BASIC | VPHY/VPLL filter (reference-design practice; DS figure shows caps only) | 3V3 | 3V3_FTA |
+| C83, C84 | 4.7 µF / 100 nF | 0603 / 0402 | C19666 / C1525 ✔ | VPHY (pin 4) | 3V3_FTA | GND |
+| C85, C86 | 4.7 µF / 100 nF | 0603 / 0402 | C19666 / C1525 ✔ | VPLL (pin 9) | 3V3_FTA | GND |
+| C82 | 100 nF | 0402 | C1525 ✔ | U8 VCC | 3V3 | GND |
+
+Direct connections (no part): TEST (13) → GND · AGND (10) and GND pins → GND · DM (7)/DP (8) → USB_DN/USB_DP **direct** (Fig 6.1 has no series R) · PWREN# (60), SUSPEND# (36), unused ADBUS4–7/ACBUS/BDBUS4–7/BCBUS → NC (named `*_NC`).
+
 | Desig | Value | Pkg | LCSC | Function | Pin1 Net | Pin2 Net |
 |---|---|---|---|---|---|---|
 | R70 | 12 kΩ 1 % | 0402 | C25752 ✔ BASIC | FT REF | FT_REF | GND |
@@ -185,7 +219,6 @@ User I/O: 80 balls per `board/latfun6.lpf`. The remaining 113 I/O are unconnecte
 | R76–R79 | 33 Ω | 0402 | C25105 ✔ | JTAG series: ADBUS0→TCK, ADBUS1→TDI, TDO→ADBUS2, ADBUS3→TMS | FT_AD0..3 | JTAG_TCK/TDI/TDO/TMS |
 | R80–R81 | 33 Ω | 0402 | C25105 ✔ | UART series: BDBUS1 RXD ← UART_TX, BDBUS0 TXD → UART_RX | FT_BD1 / FT_BD0 | UART_TX / UART_RX |
 | R82–R83 | 33 Ω | 0402 | C25105 ✔ | BDBUS2 RTS# → UART_CTS_N, BDBUS3 CTS# ← UART_RTS_N | FT_BD2 / FT_BD3 | UART_CTS_N / UART_RTS_N |
-| C70–C71 | 18 pF ✱ | 0402 | C1549 ✔ BASIC | Y1 load caps (crystal CL 20 pF ⇒ ~27–33 pF? A2) | FT_OSCI / FT_OSCO | GND |
 | C72–C79 | 100 nF | 0402 | C1525 ✔ | FT VCCIO/VPHY/VPLL/VREGIN/VCORE decoupling | per pin | GND |
 | C80–C81 | 4.7 µF ✱ / 3.3 µF | 0603 | — ⚠ | VREGIN/VREGOUT per DS | FT_VREGIN / 1V8_FT | GND |
 | C82 | 100 nF | 0402 | C1525 ✔ | U8 VCC | 3V3 | GND |
@@ -193,16 +226,16 @@ User I/O: 80 balls per `board/latfun6.lpf`. The remaining 113 I/O are unconnecte
 
 | Desig | Value | Pkg | LCSC | Function |
 |---|---|---|---|---|
-| U7 | FT2232HL-REEL | LQFP-64 | C27882 ✔ EXT (1933, $11.13) | USB ↔ JTAG (ch A MPSSE) + UART (ch B) |
+| U7 | **FT2232HL-TRAY** | LQFP-64 | **C1521564** ✔ EXT (231, $13.50). ⚠ E7: C27882 (REEL) listing describes an "FT2232H Mini Module eval board" while MPN/package say bare IC, so it was rejected; alternate only after confirming with LCSC | USB ↔ JTAG (ch A MPSSE) + UART (ch B) |
 | U8 | 93LC56BT-I/OT | SOT-23-6 | C190271 ✔ EXT | FT config EEPROM (board name, VID/PID) |
 | Y1 | 12 MHz crystal, 20 pF, ±10 ppm | 3225 | C9002 ✔ BASIC | FT2232H clock |
-| J2 | 1×6 2.54 mm header: 1=3V3(VCCIO8) 2=GND 3=TCK 4=TDO 5=TDI 6=TMS, **pin by pin vs. silkscreen** | THT | C40877 ✔ EXT (female ⚠ use male) | External JTAG (Lattice flywire order) |
+| J2 | PZ254V-11-06P 1×6 2.54 mm male: **1 TCK · 2 TDI · 3 TDO · 4 TMS · 5 GND · 6 3V3** (matches the in-house FT2232H Mini Module JTAG wiring), **pin by pin vs. silkscreen** | THT | C492405 ✔ EXT (70k) | External JTAG / recovery |
 
 ### Block F — User I/O and I²C EEPROM
 
 | Desig | Value | Pkg | LCSC | Function | Pin1 Net | Pin2 Net |
 |---|---|---|---|---|---|---|
-| D10–D17 | LED green | 0603 | C12624 ✔ EXT | led[0..7], active high (A = R side) | LEDn_A (A) | GND (K) |
+| D10–D17 | LED yellow-green KT-0603YG (Vf 2.0–2.2 V, ≈1.2 mA) | 0603 | C2289 ✔ EXT | led[0..7], active high (A = R side) | LEDn_A (A) | GND (K) |
 | R100–R107 | 1 kΩ | 0402 | C11702 ✔ | LED current (~1.3 mA) | LED[n] | LEDn_A |
 | SW2 | TS-1187A | SMD | C318884 ✔ | btn_n[0] **RESET** | BTN_N0 | GND |
 | SW3 | TS-1187A | SMD | C318884 ✔ | btn_n[1] **un-debounced** (Lab 5.2), no RC by design | BTN_N1 | GND |
@@ -327,9 +360,9 @@ Globally unique. Non-LCSC parts: none planned. Connectors with low or wrong-gend
 
 | Net | Source | Loads |
 |---|---|---|
-| VBUS → VBUS_F → 5V_SYS | J1 VBUS | F1, R3, D1, C1–C3, U2, U3, U13 |
+| VBUS → 5V_SYS | J1 VBUS → F1 | D1, C1, C2, U2, U3, U13 (total VBUS capacitance 22 + 2×10 µF ≈ 42 µF nominal, ≈ 20 µF effective at 5 V bias: above the 10 µF USB guideline, accepted and common on dev boards; PTC limits inrush) |
 | 3V3_PRE → 3V3 | U2 + L1 → RS1 | see §1 power distribution |
-| 1V1_PRE → 1V1 → VCC_CORE | U3 + L2 → RS2 → FB3 | U5 VCC ×6 |
+| 1V1_PRE → 1V1 | U3 + L2 → RS2 (FB sensed at 1V1) | U5 VCC ×6 |
 | 2V5_PRE → 2V5 → VCCAUX | U4 → RS3 → FB2 | U5 VCCAUX ×2 |
 | 5V_HDMI | U13 OUT | J3.18, R130/R131, U12 VREF2 path |
 | 1V8_FT | U7 VREGOUT | U7 VCORE |
@@ -342,7 +375,7 @@ Globally unique. Non-LCSC parts: none planned. Connectors with low or wrong-gend
 | Category | Designators | Qty | LCSC | Stock status |
 |---|---|---|---|---|
 | FPGA | U5 | 1 | C1550762 | EXTENDED, 1093 (−6C variant ZERO_STOCK, see note) |
-| USB bridge | U7 | 1 | C27882 | EXTENDED, 1933 |
+| USB bridge | U7 | 1 | C1521564 | EXTENDED, 231 (C27882 rejected, E7) |
 | Flash | U6 | 1 | C97521 | BASIC, 67k |
 | Bucks | U2, U3 | 2 | C141836 | EXTENDED, 500k |
 | LDO | U4 | 1 | C176945 | EXTENDED, 2.7k |
@@ -370,13 +403,88 @@ Globally unique. Non-LCSC parts: none planned. Connectors with low or wrong-gend
 
 ### S2 Discovery — N/A (new schematic)
 
-### S3 Place — NOT STARTED
-Prereqs: EasyEDA Pro open with a new project `LATFUN6`, easyeda MCP connected, `sch_ping` ok. U5 symbol: EasyEDA library device for C1550762 (or C1521614), and **verify its ball names against the Lattice CSV** (script: compare the symbol's pin list with `cabga256_25f.json`).
+### S3 Place — IN PROGRESS
+- [x] U5 LFE5U-25F-7BG256I (C1550762, EasyEDA device `6f94a9b5…`, symbol copy `92047faa…`, footprint CABGA-256 0.8 mm) placed on p1 as **9 sub-parts**, all `U5` / uniqueId `gge5001`:
+  .1 bank 7 (200,850) · .2 bank 6 (580,850) · .7 bank 1 (960,850) · .5 bank 2/3 (1340,850) · .8 bank 0 (200,400) · .3 bank 8 + config (600,420) · .4 JTAG (600,180) · .6 bank 3/2 (960,400) · .9 power/GND (1340,420). No overlaps (checked from the saved file).
+- [x] **U5 symbol vs. Lattice CSV: 256/256 balls, number and name identical (strict check), 0 missing, 0 extra.** Done offline from the saved .eprj.
+- [x] **Region R2 (Block C support) placed, 2026-11-20**, sheet now A0 (user):
+  - y=1450: C30–C35 100 nF, C36–C37 10 µF (VCC) · C38–C39 100 nF, C40 10 µF (VCCAUX) · FB2 BLM18PG221 (1130,1450, horizontal)
+  - y=1650: C41–C53 100 nF (VCCIO ×13) · C54–C57 10 µF
+  - y=1250: R30–R39 (PROGRAMN, INITN, DONE PU · R33 CCLK PU 1k · R34 CCLK series 33 Ω · R35 CFG1 PU · R36–R38 TDI/TMS/TDO PU · R39 TCK PD)
+  - y=1850: X1 (250) · FB5 (450) · C58 (570) · SW1 (750) · C59 (870) · R40 (970) · R41 (1050) · R42 (1130) · Q1 (1250) · D3 (1380)
+  - Caps/resistors at 90°: **pin 2 = top, pin 1 = bottom**, 40 apart. Convention: decoupling top (pin 2) = rail, bottom (pin 1) = GND.
+  - Audit from saved file: 58 parts, every designator/uniqueId set, no duplicates.
+- **Symbol pin maps (verified from the saved symbols):**
+  - X1 O9322525MEDA4SI: 1 OE/NC (tie to 3V3_OSC = always enabled), 2 GND, 3 OUT, 4 VDD
+  - SW1 TS-1187A: A–B (pins 1, 2) joined, C–D (pins 3, 4) joined, switch between the pairs → PROGRAMN on 1/2, GND on 3/4. ✱ A2: confirm against the C318884 datasheet drawing
+  - Q1 BSS138-7-F: 1 G, 2 S, 3 D · D3 KT-0603YG: 1 K, 2 A
+- [x] **Region R4 (part), 2026-11-20:** U7 FT2232HL-TRAY (2300,1750; body ±100 × −190…+200, pins to x 2180/2420, y 1540/1970) · Y1 (1950,1560) · U8 93LC56BT (1880,1800) · U6 W25Q128JVSIQ (2750,2250) · Block D row y=2380: R60 (2650), R61 (2730), R62 (2810), C60 (2890).
+  - Symbol pin maps: U6 1 CS#, 2 DO, 3 IO2, 4 GND, 5 DI, 6 CLK, 7 IO3, 8 VCC · U8 1 DO, 2 VSS, 3 DI, 4 CLK, 5 CS, 6 VCC (93LC56**B** = fixed ×16, as the FT2232H needs) · Y1 1 OSC1, 3 OSC2, 2/4 GND · U7: 64 pins named per the standard FT2232HL map (VREGIN 50, VREGOUT 49, VCORE 12/37/64, VCCIO 20/31/42/56, VPHY 4, VPLL 9, REF 6, RESET# 14, TEST 13, EECS/EECLK/EEDATA 63/62/61, ADBUS0–3 16–19, BDBUS0–3 38–41). ✱ A2: confirm against DS_FT2232H.
+- [x] **Region R4 complete, 2026-11-20** (values from DS_FT2232H v2.9, supplied by the user):
+  - y=2100: FB4 (1760) · C83 4.7 µF, C84 (VPHY) · C85 4.7 µF, C86 (VPLL) · C72, C81 4.7 µF (VREGIN) · C80 3.3 µF (VREGOUT) · C73–C75 (VCORE) — x 1860…2580 step 80
+  - y=2220: C76–C79 (VCCIO) x 1860…2100
+  - y=1400: R70 12k · R71 RESET# PU · R72 EECS PU · R73 EECLK PU · R75 EEDATA PU · R74 2k2 · C70/C71 27 pF · C82 (U8) — x 1800…2460
+  - y=1290: R76–R83 33 Ω — x 1800…2360
+  - J2 PZ254V-11-06P (2700,1880)
+  - Audit: 99 parts, designators unique, **no overlaps** (bbox check incl. stub margin).
+- [x] **Region R3 complete, 2026-11-20** (TLV62569 + AP2112 datasheets checked, see A2):
+  - y=2840: J1 USB-C (220,2900; all signal pins on its left edge, shell EH 1–4 on the right) · U1 (480,3000) · F1 (460) · D1 (600) · C1 (680) · C2 (760) · R1 (840) · R2 (920)
+  - y=2560: U2 (300) · L1 (480) · C10 (580) · C12 (660) · C13 (740) · R10 (820) · R11 (900) · RS1 (1020, horizontal)
+  - y=2320: U3 (300) · L2 (480) · C11 (580) · C14 (660) · C15 (740) · R12 (820) · R13 (900) · RS2 (1020, horizontal) · R14 (1140) · C16 (1220)
+  - y=2110: U4 (300) · C17 (480) · C18 (560) · RS3 (680, horizontal) · D2 (840) · R15 (920)
+  - C3 placed then deleted (see Block A); R3 never placed (deleted from design)
+  - Audit: 131 parts, designators unique, no overlaps.
+- **Symbol pin maps R3 (from saved file):** U2/U3 1 EN · 2 GND · 3 SW · 4 VIN · 5 FB (= TI DBV ✅) · U4 1 IN · 2 GND · 3 EN · 4 NC · 5 OUT (= Diodes SOT25 ✅) · U1 USBLC6: 1/6 I/O1, 3/4 I/O2 (flow-through), 2 GND, 5 VBUS · D1 SMF5.0A: **1 C (cathode) → 5V_SYS, 2 A → GND** · J1: A1B12/B1A12 GND, A4B9/B4A9 VBUS, A5 CC1, B5 CC2, A6/B6 DP1/DP2 → USB_DP, A7/B7 DN1/DN2 → USB_DN, A8/B8 SBU NC, EH 1–4 shell → GND
+- ⚠ **LED pin numbering differs between libraries (lesson §5 trap):** D2 KT-0603R **1 = A, 2 = K**; D3/D10–D17 KT-0603YG **1 = K, 2 = A**. ⇒ Wire LEDs by function (A/K names), never by pin number; Gate C3 checks the anode net on every LED.
 
 ### S4 Wire / S5 Frames — NOT STARTED
 
-### GATE A2 — NOT STARTED: U5, U7, U2/U3, U4, U6, U9, U12, U13, U10/U11, U1, U8
+### GATE A2 — IN PROGRESS: U5 symbol ✅ (256/256); U7 design ✅ (below); pending U2/U3, U4, U6, U9, U12, U13, U10/U11, U1, U8
+
+#### A2 — U2/U3 (TLV62569DBV) — PASS (design values)
+- **Datasheet:** TI TLV62569 (SLVSD58-family PDF, local copy), §7 VFB, §8.2.2, Table 4
+- Pinout DBV: 1 EN · 2 GND · 3 SW · 4 VIN · 5 FB (confirm against the EasyEDA symbol at placement)
+- VFB 0.588/0.600/0.612 V (±2 %) · VOUT = VFB·(1 + R1/R2) · R2 ≤ 200 kΩ ✅ (150 k / 120 k)
+- 3V3: R10 680 k / R11 150 k ⇒ 3.320 V nominal; worst case (±2 % ref, 1 % R) 3.21–3.43 V ✅ (FT2232H 2.97–3.63 V, VCCIO ±5 %: 3.135–3.465 V ✅)
+- 1V1: R12 100 k / R13 120 k ⇒ 1.100 V nominal; worst case 1.067–1.133 V ✅ inside ECP5 VCC 1.045–1.155 V (±5 %); ⚠ uses about 3 % of budget for the source, which is Lattice's TN-02038 §2.2 guideline: noise margin is then ~2 %. Accepted; measurable at TP_1V1
+- LC per Table 4: 1V1 2.2 µH + 2×22 µF (standard ++ cell) ✅ · 3V3 2.2 µH + 2×22 µF ("+" proven cell) ✅ · CIN ≥ 4.7 µF (10 µF) ✅ · inductor Isat 3.4 A ≥ 1.3 × IL,max ✅
+- EN must not float: U2 EN → 5V_SYS; U3 EN → R14/C16 from 3V3 (sequencing, VIH ≤ 1.2 V) ✅
+- Feedback sensed after the shunts (R10 top on 3V3, R12 top on 1V1) ✅. Feed-forward cap (6.8 pF for R2 = 100 k) optional, not fitted
+
+#### A2 — U4 (AP2112K-2.5) — PASS
+- **Datasheet:** Diodes AP2112 (June 2017), SOT25: 1 VIN · 2 GND · 3 EN · 4 NC · 5 VOUT; typical app 1 µF in/out ✅ (C17/C18); EN → VIN ✅; 0.8 V headroom vs 250 mV dropout ✅; VOUT ±1.5 %
+
+#### A2 — U7 (FT2232HL) — PASS (design values; re-run on the live netlist after S4)
+- **Datasheet:** DS_FT2232H v2.9 (local copy `hardware/datasheets/`, not redistributed), Fig 6.1, §5, §6.3, §7
+- **Reference practice:** FT2232H Mini Module style VPHY/VPLL filtering; known FT2232H capture pitfalls (floating RESET#, missing EEPROM pull-ups, unfiltered VPHY/VPLL)
+
+| Pin | Name | Reference (DS v2.9) | Project | Verdict |
+|---|---|---|---|---|
+| 50 | VREGIN | +3.3 V + filter cap | 3V3, C72 100 nF + C81 4.7 µF | ✅ |
+| 49 | VREGOUT | 3.3 µF, routed to VCORE | 1V8_FT, C80 3.3 µF | ✅ |
+| 12/37/64 | VCORE | 1.8 V from VREGOUT, 100 nF each | 1V8_FT, C73–C75 | ✅ |
+| 20/31/42/56 | VCCIO | 3.3 V, 100 nF each | 3V3, C76–C79 | ✅ |
+| 4 | VPHY | 3.3 V, 4.7 µF + 100 nF | 3V3_FTA (via FB4), C83/C84 | ✅ (bead added) |
+| 9 | VPLL | 3.3 V, 4.7 µF + 100 nF | 3V3_FTA (via FB4), C85/C86 | ✅ (bead added) |
+| 6 | REF | 12 kΩ to GND | R70 12 k 1 % | ✅ |
+| 14 | RESET# | tie to VCCIO if unused | R71 10 k to 3V3 | ✅ |
+| 13 | TEST | GND | GND | ✅ |
+| 2/3 | OSCI/OSCO | 12 MHz crystal, 27 pF each | Y1 C9002 (CL 20 pF), C70/C71 27 pF | ✅ |
+| 61/62/63 | EEDATA/EECLK/EECS | 93Cx6 ×16; 10 k PU ×3; EEDATA→2k2→DO, EEDATA→DI | U8 93LC56B (×16); R72/R73/R75 10 k; R74 2k2 | ✅ |
+| 7/8 | DM/DP | direct to USB | direct to J1 via U1 ESD | ✅ |
+| 10, GND | AGND/GND | GND | GND | ✅ |
+| 16–19 | ADBUS0–3 | MPSSE TCK/TDI/TDO/TMS | JTAG via R76–R79 33 Ω | ✅ |
+| 38–41 | BDBUS0–3 | UART TXD/RXD/RTS#/CTS# | UART via R80–R83 33 Ω | ✅ |
+| 36/60 | SUSPEND#/PWREN# | outputs, optional | NC | ✅ |
+
+**In-house FT2232H lessons applied (from earlier boards; nothing copied):**
+1. **Crystal pin swap (YSX321SL / C9002):** working pins are the **diagonal 1 + 3**; 2 and 4 are internal GND leads. Wiring OSCO to pin 2 shorts it to GND and kills oscillation, and it is invisible to DRC. ⇒ **Y1.1 → FT_OSCI, Y1.3 → FT_OSCO, Y1.2 + Y1.4 → GND.** Added to Gate C3 as a mandatory netlist check.
+2. **EEPROM DI/DO:** DI and DO both tied straight to EEDATA is a known defect. ⇒ DI direct, DO via R74 2.2 kΩ (DS Fig 6.1).
+3. Load caps: an earlier board used 18 pF; DS v2.9 §6.3 shows 27 pF and CL = 20 pF supports ~28 pF ⇒ **27 pF**.
+4. USB DP/DM: an earlier board used 27 Ω series; DS v2.9 Fig 6.1 shows none ⇒ **direct**.
+
 ### GATE C3 — top-3 risk: U5 (config pull-ups), U7 (EEPROM/REF/regulator), U2/U3 (FB dividers)
+- Mandatory extra checks: every LED anode on its drive/resistor net and cathode on GND/Q1 (by A/K name) · D1 cathode on 5V_SYS · **Y1.1 = FT_OSCI, Y1.3 = FT_OSCO, Y1.2/Y1.4 = GND** · U8 DI on FT_EEDATA, U8 DO only via R74 · X1.1 OE on 3V3_OSC
 ### GATE C4 / D — NOT STARTED
 
 ---
