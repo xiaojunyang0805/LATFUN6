@@ -4,11 +4,13 @@
 >
 > **v0.2 pinout DONE (2026-11-20):** `tools/gen_board.py` v0.2 → `board/latfun6.json`, `.lpf`, `latfun6_platform.py` (LiteX). 175 signals / 175 balls; checks: banks + VCCIO (3.3 V: 0/1/2/3/8; 1.35 V: 6/7), pairs, A/B LVDS pairs for PMODs, PCLK for clk_25mhz / eth_rx_clk / ulpi_clk, DDR3 byte lanes inside their DQS groups (byte0 L41 DQS K2, byte1 L29 DQS H4), K16/K17 unused, identical roles on the 85F. DDR3 ball map follows Lattice's ECP5-5G Versa reference (same device/package) plus A13 = A3, A14 = D3.
 > **P&R proof:** `test/litex_smoke.py` (LiteX: LiteDRAM ECP5DDRPHY + MT41K256M16, LiteEth RGMII + Etherbone, UART bridge) and `test/make_io_smoke.py` (all 125 non-DDR I/O) both route with **0 errors on LFE5UM5G-45F and -85F** (nextpnr `--um5g-45k/85k --package CABGA381 --speed 8`). Ethernet RX 125 MHz meets timing (184 / 156 MHz). The smoke SoC's sys clock is unconstrained (gateware task, not a board risk).
-> **Open-flow support found:** SERDES ✅ LiteICLink `serdes_ecp5` · RGMII ✅ LiteEth `ecp5rgmii` · DDR3 ✅ LiteDRAM `ECP5DDRPHY` · **PCIe ⚠ LitePCIe has no ECP5 PHY** (Xilinx/Cyclone V only); open ECP5 PCIe exists only as experimental Gen1 x1 work (Yumewatari PHY, ECP5-PCIe GSoC); Lattice's endpoint IP is proprietary (Diamond). Decision pending with the user.
+> **Open-flow support found:** SERDES ✅ LiteICLink `serdes_ecp5` · RGMII ✅ LiteEth `ecp5rgmii` · DDR3 ✅ LiteDRAM `ECP5DDRPHY` · **PCIe ⚠ LitePCIe has no ECP5 PHY** (Xilinx/Cyclone V only); open ECP5 PCIe exists only as experimental Gen1 x1 work (Yumewatari PHY, ECP5-PCIe GSoC); Lattice's endpoint IP is proprietary (Diamond). **Decision 2026-11-20: keep PCIe x1 edge (option a)** — hardware ready at launch; labs use Lattice IP or the experimental open core; an open ECP5 PCIe endpoint is a flagship frontier project.
 
 
 **Project:** LATFUN6, the open ECP5 textbook board for the Open FPGA Tutorial
 **Board:** latfun6 rev v0.1
+> **U5 replaced (2026-11-20):** the 9 LFE5U-25F parts were deleted and replaced by **LFE5UM5G-45F-8BG381C** (LCSC C7215983, consigned), uid gge5001. Sub-parts: .1 bank7 (200,850) · .2 bank6 (580,850) · .5 bank3 (960,850) · .6 bank2 (1340,850) · .7 bank1 (200,400) · .8 bank0 (580,400) · .3 config/bank8 (960,420) · .4 SERDES (1340,400) · .10 power (1620,830) · .9 GND (1620,380). **Symbol check: 381/381 balls match the Lattice ECP5-5G-45 CSV (51578), 0 name mismatches, each bank on exactly one sub-part.** Datasheet check results → definition.md §10.
+
 **Date started:** 2026-11-20
 **Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
 **Design spec:** `docs/definition.md`
@@ -40,7 +42,7 @@ Status flags used below: ✔ verified C-number + stock (JLCPCB API, 2026-11-20) 
 
 | Region | Blocks | x range | y range |
 |---|---|---|---|
-| R1 | U5 (9 sub-parts) | 100–1450 | 140–1030 |
+| R1 | U5 (10 sub-parts, LFE5UM5G-45F-8BG381C) | 100–1700 | 140–1060 |
 | R2 | C support: decoupling, config/JTAG resistors, X1, DONE LED, SW1 | 100–1450 | 1150–1550 |
 | R3 | A + B: USB-C entry, regulators, shunts | 100–1450 | 1650–2250 |
 | R4 | D flash + E FT2232H, J2 | 1600–2550 | 1150–2250 |
