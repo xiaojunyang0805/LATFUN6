@@ -3,7 +3,7 @@
 **Project:** LATFUN6, open ECP5-5G application board
 **Board:** LATFUN6 rev v0.2. File `hardware/EDA/Latfun6.eprj`, PCB document `pcb1`.
 **Date started:** 2026-11-20
-**Status:** W2 placement v1 written to the project 2026-11-21 (awaiting user review in EDA)
+**Status:** W2 placement v2 (with 4 mounting holes) written 2026-11-21; layout research on reference boards in progress
 **Schematic worknote:** `latfun6_worknote.md` (gates A2 / C3 / C4 / D PASS, 2026-11-20)
 **EasyEDA Pro version:** V2.2.47.7
 
@@ -131,6 +131,15 @@ Draft, to confirm once J12's finger datum is known. Bracket edge = left (x = 0),
 2. Bracket screw holes / keep-outs (CEM full-height bracket) are not reserved yet.
 3. Connector overhang at the bracket: USB-C/HDMI 1 mm, RJ45 2 mm, jack 0.5 mm. Confirm in 3D against a bracket.
 4. J9 LA header and J10 are vertical male headers at the top-right inner area.
+
+### Placement v2: 4 mounting holes (user request 2026-11-21)
+
+- **Holes:** 4 × M3 board-level PADs, plated, net GND, hole 3.2 mm, pad 6.0 mm. Record template copied from a GUI-made board PAD (field 15 = 1 = plated). Keep-out for parts: 4.3 mm radius, both sides.
+- **Positions (mm):** MH1 (19.5, 4.5), MH2 (163.65, 4.0), MH3 (19.5, 98.25), MH4 (163.65, 98.75).
+- **Why the left holes are 19.5 mm in from the bracket edge:** the six bracket connectors need ≈ 85 mm of the ≈ 86 mm left between corner holes at x = 4. Moving the holes in also keeps clear of where the bracket screws attach (✱ open item 2).
+- **Moves to make room:** PMODs shifted 4 mm down; U10/U11 and U20 moved off the keep-outs.
+- **Written:** backup `Latfun6.eprj.bak_placement_v2_holes_20261121-003151`. Re-check on the project: 0 pad pairs < 0.6 mm (holes included).
+- **Reference noted (user):** ALINX AX7020 (Zynq, 130 × 90 mm, 8 layers with dedicated power + GND layers, 4 corner holes, all I/O on the edges, DDR3 beside the SoC, regulators in one column along one side).
 
 ## Section 5 — Net classes and widths (from §1 only)
 

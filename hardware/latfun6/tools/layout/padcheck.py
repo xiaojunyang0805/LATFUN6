@@ -5,7 +5,8 @@ from eprj_core import Board, gap, bbox
 f = sys.argv[1]; LIM = 0.6 / 0.0254
 Bc = Board(f)
 EDGE_OK = {'J1','J3','J11','J12','J14','J15','J16','J17','J18','J19','J20','J21','J4','J5','J6','J7','J8'}
-pads = [p for p in Bc.pads if not p.des.startswith('PAD_')]
+pads = list(Bc.pads)
+print('board-level pads:', [(p.des, p.num, p.net, round(ec.shape_center(p.shape)[0]*0.0254,2), round(-ec.shape_center(p.shape)[1]*0.0254,2)) for p in Bc.pads if p.des.startswith('PAD_')])
 grid = ec.Grid(60.0)
 for i, p in enumerate(pads): grid.add(i, bbox(p.shape))
 bad = collections.defaultdict(lambda: 1e9)

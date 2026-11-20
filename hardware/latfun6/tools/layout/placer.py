@@ -76,13 +76,13 @@ put('SW1', 100.0, 6.0, 0, 1)       # PROGRAMN button, top edge area
 put('U7', 33.0, 24.0, 0, 1)
 put('J2', 38.0, 13.0, 0, 1)         # JTAG header
 # HDMI block behind J3
-put('U10', 20.0, 6.5, 90, 1); put('U11', 20.0, 14.5, 90, 1)
+put('U10', 20.0, 11.5, 90, 1); put('U11', 20.0, 18.0, 90, 1)
 put('U12', 27.0, 4.0, 0, 1); put('U13', 27.0, 15.0, 0, 1)
 # Ethernet / ULPI behind their jacks
 put('U31', 33.0, 62.0, 0, 1)
 put('U32', 30.0, 80.0, 0, 1)
 # power: 12 V entry near jack + slot 12 V pins, bucks bottom right; core buck near U5
-put('U20', 22.0, 95.0, 0, 1); put('U21', 38.0, 95.0, 0, 1)
+put('U20', 27.0, 91.0, 0, 1); put('U21', 38.0, 95.0, 0, 1)
 put('U22', 100.0, 92.0, 0, 1); put('U23', 116.0, 92.0, 0, 1)
 put('U2', 130.0, 92.0, 0, 1)                         # 3V3
 put('U3', 94.0, 66.0, 0, 1)                          # 1V2 core, near U5
@@ -99,7 +99,7 @@ put('R140', 140.0, 18.0, 0, 1)                       # audio filter anchor
 put_edge('J21', 180, 'T', 86.0, over=0.0)            # microSD at the top edge (card in from the top)
 put('J9', 131.0, 22.0, 0, 1); put('J10', 142.0, 22.0, 0, 1)   # LA header + loopback
 for i, d in enumerate(['J5', 'J6', 'J7', 'J8']):    # PMODs, rear edge, facing out
-    put_edge(d, 90, 'R', 14.0 + i * 17.5, over=0.0)
+    put_edge(d, 90, 'R', 18.5 + i * 17.5, over=0.0)
 put('TP1', 125.0, 40.0, 0, 1)                        # test-point field anchor
 # PCIe TX AC caps in the corridor right above the B14/B15 fingers (x = J12 origin + 15 / 16 mm)
 jx = plan['J12'][0]
@@ -157,6 +157,12 @@ KEEP[2] += [field('U5', 1.7), field('U30', 1.7)]          # bottom: inner ball f
 # routing corridors kept free of top-side parts (W1 rank 1): PCIe to the fingers, SFP to the cage, SMA to the top edge
 CORR = [(57.5, 52.0, 65.8, 101.5), (49.8, 43.0, 67.2, 58.8), (50.5, 4.5, 57.0, 43.0)]
 KEEP[1] += CORR
+# 4 x M3 mounting holes (plated, GND, 6.0 mm pad): keep-out radius 4.3 mm on both sides
+HOLES = [(19.5, 4.5), (W - 4.0, 4.0), (19.5, H - 4.5), (W - 4.0, H - 4.0)]
+for hx, hy in HOLES:
+    for s_ in (1, 2): KEEP[s_].append((hx - 4.3, hy - 4.3, hx + 4.3, hy + 4.3))
+json.dump(HOLES, open('holes.json', 'w'))
+print('anchors on holes', [d for d,p in plan.items() if any(ov(rect_of(d,p),(hx-4.3,hy-4.3,hx+4.3,hy+4.3)) for hx,hy in HOLES)])
 print('anchors in corridors', [d for d,p in plan.items() if p[3]==1 and any(ov(rect_of(d,p),c) for c in CORR) and d not in ('J12',)])
 def free(r, side, d):
     if r[0] < 0.5 or r[1] < 0.5 or r[2] > W - 0.5 or r[3] > H - 0.5: return False

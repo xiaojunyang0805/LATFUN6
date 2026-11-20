@@ -42,6 +42,17 @@ path = [round(pts[0][0], 4), round(pts[0][1], 4), 'L']
 for x, y in pts[1:]: path += [round(x, 4), round(y, 4)]
 for r in rowsj:
     if r and r[0] == 'POLY' and len(r) > 6 and r[4] == 11: r[6] = path
-new = '\n'.join(json.dumps(r, ensure_ascii=False, separators=(',', ':')) if r is not None else '' for r in rowsj)
+# mounting holes: 4 x M3, plated (field 15 = 1), GND, hole 3.2 mm, pad 6.0 mm (template: a GUI-made board PAD)
+rowsj = [r for r in rowsj if not (r and r[0] == 'PAD' and str(r[5]).startswith('MH'))]
+holes = json.load(open('holes.json'))
+nid = P.id_alloc('e8mh')
+padrows = []
+for k, (hx, hy) in enumerate(holes, 1):
+    padrows.append(['PAD', nid(), 0, 'GND', 12, f'MH{k}', round(hx / MIL, 4), round(-hy / MIL, 4), 0,
+                    ['ROUND', round(3.2 / MIL, 4), round(3.2 / MIL, 4)], ['ELLIPSE', round(6.0 / MIL, 4), round(6.0 / MIL, 4)],
+                    [], 0, 0, 0, 1, 0, None, None, None, None, 0, None, None, None, None, []])
+new_lines = [json.dumps(r, ensure_ascii=False, separators=(',', ':')) if r is not None else '' for r in rowsj]
+new_lines = ec.insert_after_last(new_lines, [json.dumps(r, separators=(',', ':')) for r in padrows], ('COMPONENT', 'PAD'))
+new = chr(10).join(new_lines)
 ec.make_candidate(P, new, OUT)
 print('moved', len(moved), 'components; outline points', len(pts), '->', OUT)
