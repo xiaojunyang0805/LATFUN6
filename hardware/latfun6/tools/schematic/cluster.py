@@ -25,16 +25,20 @@ def netof(des, num, name):
     if des in nm.P2: return nm.P2[des][int(num) - 1] if num in ('1', '2') else None
     m = nm.BYNAME.get(des, {}); return m.get(name, m.get(num))
 
+import symlib
+_L, _C, _A = symlib.page(page)
+def _sym(des):
+    cid = P[des]['id']; return symlib.lookup(_A[cid].get('Device'), P[des]['part'], _A[cid].get('Symbol'))
 def rel_pins(des, rot):
     """pins relative to origin for rotation rot: [(num,name,x,y,outdir,net)]"""
-    part = P[des]['part']; out = []
-    for num, name, x, y, r in SYM[part]:
+    out = []
+    for num, name, x, y, r in _sym(des)['pins']:
         t = math.radians(rot); ax = x * math.cos(t) - y * math.sin(t); ay = x * math.sin(t) + y * math.cos(t)
         out.append((num, name, ax, ay, (r + 180 + rot) % 360, netof(des, num, name)))
     return out
 
 def rel_box(des, rot):
-    x0, y0, x1, y1 = BB[P[des]['part']]
+    x0, y0, x1, y1 = _sym(des)['bbox']
     pts = [(x0, y0), (x0, y1), (x1, y0), (x1, y1)]; t = math.radians(rot)
     q = [(x * math.cos(t) - y * math.sin(t), x * math.sin(t) + y * math.cos(t)) for x, y in pts]
     xs = [a for a, _ in q]; ys = [b for _, b in q]
@@ -50,13 +54,28 @@ COLW, ROWH = 100, 40
 layout = {}   # des -> (x, y, rot) relative to cluster origin
 clusters = []
 for gname, main, members in gm.GROUPS:
-    rel = {main: (0, 0, gm.MAIN_ROT.get(main, 0))}
+    def okrot(d, want=None):
+        cur = P[d]['rot'] % 360
+        if d in TWO or len(P[d]['pins']) <= 2: return (want if want in (0, 180) and cur == 0 else (0 if cur == 0 and want is None else 180))
+        return cur
+    GRID = getattr(gm, 'GRID', {}); GP = getattr(gm, 'GRIDP', {})
+    if gname in GRID:
+        ncol = GRID[gname]; dx, dy = GP.get(gname, (100, 45)); rel = {}
+        for i, m in enumerate(members):
+            if m is None: continue
+            rel[m] = ((i % ncol) * dx, -(i // ncol) * dy, okrot(m))
+        bx = []
+        for d, (x, y, r) in rel.items():
+            b = rel_box(d, r); bx.append((x + b[0], y + b[1], x + b[2], y + b[3]))
+        clusters.append((gname, rel, (min(b[0] for b in bx), min(b[1] for b in bx), max(b[2] for b in bx), max(b[3] for b in bx))))
+        continue
+    rel = {main: (0, 0, okrot(main))}
     mp = rel_pins(main, rel[main][2]); mb = rel_box(main, rel[main][2])
     placed = {main}; extra_mains = [m for m in members if m not in TWO and m != main]
     # secondary multi-pin parts (FETs, connectors, other ICs) placed by hand offsets in groups file
     for m in extra_mains:
-        ox, oy = gm.OFFSETS[m]; rel[m] = (ox, oy, gm.MAIN_ROT.get(m, 0)); placed.add(m)
-    passives = [m for m in members if m in TWO]
+        ox, oy = gm.OFFSETS[m]; rel[m] = (ox, oy, okrot(m)); placed.add(m)
+    passives = [m for m in members if m in TWO and m != main]
     # anchor nets: net -> list of (anchor x, y, side) from placed multi-pin parts
     def anchors():
         A = collections.defaultdict(list)
@@ -91,7 +110,8 @@ for gname, main, members in gm.GROUPS:
     cols = collections.defaultdict(list)
     for p, (lv, (net, (ax, ay, side, parent))) in level.items():
         cols[(side, lv)].append((ay, p, net))
-    for p in unanch: cols[(1, 4)].append((0, p, None))
+    ucol = (1, 1) if not any(k == (1, 1) for k in cols) else (1, 4)
+    for p in unanch: cols[ucol].append((0, p, None))
     edge = {1: mb[2], -1: mb[0]}
     for (side, lv), items in cols.items():
         items.sort(key=lambda t: -t[0])
@@ -101,8 +121,8 @@ for gname, main, members in gm.GROUPS:
             y = ay if last is None else min(ay, last - ROWH)
             last = y
             # orientation: pin on anchor net faces the parent (toward -side)
-            best = 0
-            for rot in (0, 180):
+            best = okrot(p)
+            for rot in ((0, 180) if P[p]['rot'] % 360 == 0 else (180,)):
                 pp = rel_pins(p, rot)
                 np_ = [px for _, _, px, _, _, n in pp if n == net]
                 if np_ and (np_[0] * side) < 0: best = rot; break
@@ -143,5 +163,7 @@ bad = [(a[0], b[0]) for i, a in enumerate(bxs) for b in bxs[i + 1:]
        if a[1][0] < b[1][2] and b[1][0] < a[1][2] and a[1][1] < b[1][3] and b[1][1] < a[1][3]]
 out_f = [d for d, b in bxs if not (F[0] + 5 <= b[0] and b[2] <= F[2] - 5 and F[1] + 5 <= b[1] and b[3] <= F[3] - 30)]
 print('parts', len(layout), 'overlaps(incl stubs)', len(bad), bad[:12], 'outside', out_f)
-moves = [{'primitiveId': '$1I' + P[d]['id'][1:], 'x': x, 'y': y, 'rotation': r} for d, (x, y, r) in layout.items()]
-json.dump(moves, open(f'layout_{sys.argv[2]}.json', 'w'))
+rot1 = [{'primitiveId': '$1I' + P[d]['id'][1:], 'rotation': r} for d, (x, y, r) in layout.items() if r != P[d]['rot'] % 360]
+xy = [{'primitiveId': '$1I' + P[d]['id'][1:], 'x': x, 'y': y} for d, (x, y, r) in layout.items() if (x, y) != (round(P[d]['x']), round(P[d]['y'])) or r != P[d]['rot'] % 360]
+json.dump({'rot': rot1, 'xy': xy, 'plan': {d: v for d, v in layout.items()}}, open(f'layout_{sys.argv[2]}.json', 'w'))
+print('rotate', len(rot1), 'move', len(xy))

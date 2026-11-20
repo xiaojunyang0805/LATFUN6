@@ -44,6 +44,15 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **P1 complete: all blocks clustered and wired (S4), 2026-11-20.**
+> - **B3–B11:** cluster layout (grids for decoupling banks, LED/button arrays, connectors and test points). 242 rotations and 324 moves, all verified in the saved file.
+> - **Frames:** B10/B11 boundary moved to x 3875/3895, giving B10 +100 units of width.
+> - **Wiring:** 1,359 stub wires on 365 nets (`tools/schematic/netmap_rest.py`, `netmap_p1.py`).
+> - **Saved-file check:** every wire lands on a pin, 0 net mismatches, 0 mapped pins unwired, attributes clean. EasyEDA merged 7 end-to-end pairs of same-net stubs.
+> - **Net names toward the FPGA** follow `board/latfun6.json` signal names (`led[0]` → `LED0`, `pmod1[7]` → `PMOD1_7`, `ddram_dq[3]` → `DDRAM_DQ3`). SERDES and dedicated pins use function names (`PCIE_HDTX_P`, `SFP_HDRX_N`, `SMA_HDTX_P`, `REFCLK_D0_P`, `CCLK`, `JTAG_TCK`, `FPGA_VREF6/7`). These close on P2.
+> - **Decisions (datasheet):** USB3320 REFSEL[2:0] = 111 → 24 MHz, tied to VDDIO (DS00001792A Table 5-10); ID left floating (B-device).
+> - **To confirm at A2:** B3 VCCIO cap split 3V3 vs 1V35; no SERDES-supply (VCCA/VCCHRX/VCCHTX) decoupling exists yet. Also SW1–SW5 contact pairs, SW6 pin pairing, PJ-313D tip/ring/sleeve, HR911130C centre-tap and LED pins, HDMI J3 pin numbers.
+
 > **B1 laid out in clusters and wired (S4), 2026-11-20.**
 > - **Layout:** 11 functional clusters (12 V jack, slot, 5 V buck, 5 V mux, USB-C #1, 3V3, 1V2, 2V5+LED, 1V35, 1V8, 1V2_SER), arranged in signal-flow rows. Every R/C/L/shunt/diode is horizontal, next to the IC pin it connects to. User: "put them in clusters, for people reading easily".
 > - **Wiring:** 256 net stubs on 51 nets from `tools/schematic/netmap_b1.py`. Saved-file check: every stub lands on exactly one pin, with the planned net (0 mismatches).

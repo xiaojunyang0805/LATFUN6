@@ -6,36 +6,14 @@ Component rotation is applied CCW in the creation (y-up) frame — verified agai
 import sqlite3, gzip, base64, json, os, collections, math
 
 PAGE = os.environ.get('PAGE', 'p1')
-con = sqlite3.connect('file:'+__import__('os').environ.get('EPRJ','hardware/EDA/Latfun6.eprj')+'?mode=ro', uri=True)
-dec = lambda ds: [json.loads(l) for l in gzip.decompress(base64.b64decode(ds[6:])).decode('utf-8', 'replace').splitlines() if l.strip()]
-sympins = {}
-for uuid, ds, dt in con.execute("select uuid,dataStr,docType from components"):
-    if dt != 2: continue
-    try: L = dec(ds)
-    except Exception: continue
-    cur = None; pins = {}; attrs = collections.defaultdict(dict); order = []
-    for l in L:
-        if l[0] == 'PART':
-            cur = l[1]; sympins.setdefault(cur, [])
-        elif l[0] == 'PIN' and cur:
-            pins[l[1]] = (cur, l[4], l[5], l[6], l[7]); order.append(l[1])
-        elif l[0] == 'ATTR' and l[2] in pins:
-            attrs[l[2]][l[3]] = l[4]
-    for pid in order:
-        part, x, y, ln, r = pins[pid]
-        sympins[part].append((attrs[pid].get('NUMBER'), attrs[pid].get('NAME'), x, y, r))
-
-L = dec(con.execute("select dataStr from documents where title=?", (PAGE,)).fetchone()[0])
-comps = {l[1]: l for l in L if l[0] == 'COMPONENT' and l[2]}
-a = collections.defaultdict(dict)
-for l in L:
-    if l[0] == 'ATTR' and l[2] in comps: a[l[2]][l[3]] = l[4]
+import symlib
+L, comps, a = symlib.page(PAGE)
 out = {}
 for cid, c in comps.items():
     part, X, Y, rot = c[2], c[3], c[4], c[5]
     mirror = bool(c[6]) if len(c) > 6 and isinstance(c[6], (bool, int)) else False
     ps = []
-    for num, name, px, py, pr in sympins.get(part, []):
+    for num, name, px, py, pr in symlib.lookup(a[cid].get('Device'), part, a[cid].get('Symbol'))['pins']:
         if mirror: px, pr = -px, (180 - pr) % 360
         t = math.radians(rot)
         ax = X + px * math.cos(t) - py * math.sin(t)
