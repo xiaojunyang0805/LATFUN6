@@ -28,6 +28,14 @@
 >   - Open: the library device's own Footprint field is still empty (the instance binding is what counts); set 'Add into BOM' = No. KiCad provides no 3D model, which is correct for PCB fingers.
 > - (history) Missing until now: J12, the PCIe x4 card edge. No device exists in the EasyEDA library, and the MCP cannot create symbols or footprints. KiCad's `Bus_PCI_Express_x4` symbol (64 pins) and `BUS_PCIexpress_x4` footprint (64 pads) are downloaded to `hardware/EDA/import/` for the user to import (EasyEDA Pro: File → Import → KiCad) as a project device.
 
+> **B8 DDR3L block placed (2026-11-20):** 29 parts (gge8001–8029) inside the B8 frame; saved-file check passed (321 parts total, no duplicates or overlaps).
+> - U30 MT41K256M16TW-107:P (C253882, 2047 in stock).
+> - Decoupling: C350–C357 100 nF and C358/C359 10 µF on VDD/VDDQ.
+> - VREF dividers, each 2 × 1 k 1 % + 100 nF: VREFCA (R330/R331/C360), VREFDQ (R332/R333/C361), FPGA VREF1_6 (R334/R335/C362), FPGA VREF1_7 (R336/R337/C363).
+> - ZQ R338 240 Ω 1 % (C114755; the library search for C25094 returned a 4-pin connector, an E7 catch). RESET# pull-down R339 10 k, CKE pull-down R340 10 k.
+> - CK AC termination: R341/R342 49.9 Ω + C364 100 nF (fit or DNP at layout). No VTT: single point-to-point chip with ODT.
+> - J12 'Add into BOM' = no (user).
+
 **Date started:** 2026-11-20
 **Status:** **S3 in progress**: EasyEDA project `hardware/EDA/Latfun6.eprj` (fresh blank project, 2026-11-20; gitignored). U5 placed on page p1.
 **Design spec:** `docs/definition.md`
