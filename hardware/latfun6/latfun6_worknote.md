@@ -54,7 +54,7 @@
 > - **C4, PASS:**
 >   - All 175 signals in `board/latfun6.json` sit on their U5 ball with the board-file name, and every one reaches a non-FPGA part. All 34 dedicated FPGA nets (config, JTAG, VREF, SERDES, rails) reach the board.
 >   - SFP lanes go through 0 Ω R310–R313 to J13 18/19 (TD±) and 13/12 (RD±), per the SFP MSA; the module AC-couples internally. PCIe: card RX (A16/A17) is direct, because the host AC-couples it; card TX goes through C322/C323.
->   - Of the 72 names in Section 3, only CFG0/CFG2 are absent, by design (tied straight to GND, no named net). ✱ Section 3 itself is still the v0.1 table (BG256 balls) and should be regenerated for v0.2. The board file plus `tools/schematic/netmap_*.py` are the authoritative record meanwhile.
+>   - Of the 72 names in Section 3, only CFG0/CFG2 are absent, by design (tied straight to GND, no named net). Section 3 regenerated for v0.2 the same day (`tools/schematic/gen_s3.py`).
 > - **D, PASS:** schematic DRC clean in EasyEDA Pro (confirmed by the user).
 
 > **Gate A2 datasheet fixes, 2026-11-20.** Every assumed pin order and open ✱ item was checked against the datasheet (PDFs via the JLCPCB parts API).
@@ -530,64 +530,309 @@ Globally unique. Non-LCSC parts: none planned. Connectors with low or wrong-gend
 
 ## Section 3 — Inter-Block Net Map
 
-### Signals (FPGA ball in brackets; user I/O from `board/latfun6.json`)
+> Regenerated 2026-11-20 for v0.2 by `tools/schematic/gen_s3.py` from `board/latfun6.json` (FPGA balls and I/O standards) and the live EasyEDA netlist (endpoints). Blocks: B1 power · B2 FPGA (P2) · B3 FPGA decoupling/config/clock · B4 FT2232H + flash · B5 user I/O + audio · B6 HDMI · B7 SERDES (REFCLK, PCIe, SFP, SMA) · B8 DDR3L · B9 Ethernet · B10 USB ULPI + microSD · B11 PMOD/LA/TPs. Endpoints are `designator.pin` (pin name where the symbol has one). Gates C3/C4 compare this table with the canvas.
 
-| Net | From | To | Notes |
+### FPGA I/O: Clock, UART, flash
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| CLK_25MHZ | B12 | 1 / LVCMOS33 | TP1.1, X1.OUT | B3 B11 |
+| FLASH_CS_N | R2 | 8 / LVCMOS33 | R60.1, TP8.1, U6.CS# | B4 B11 |
+| FLASH_IO2 | Y2 | 8 / LVCMOS33 | R61.1, U6.IO2 | B4 |
+| FLASH_IO3 | W1 | 8 / LVCMOS33 | R62.1, U6.IO3 | B4 |
+| FLASH_MISO | V2 | 8 / LVCMOS33 | U6.DO | B4 |
+| FLASH_MOSI | W2 | 8 / LVCMOS33 | U6.DI | B4 |
+| UART_CTS_N | B17 | 1 / LVCMOS33 | R82.2 | B4 |
+| UART_RTS_N | D16 | 1 / LVCMOS33 | R83.2 | B4 |
+| UART_RX | C16 | 1 / LVCMOS33 | R81.2, TP4.1 | B4 B11 |
+| UART_TX | B16 | 1 / LVCMOS33 | R80.2, TP3.1 | B4 B11 |
+
+### FPGA I/O: User I/O: LEDs, buttons, DIP, I²C, audio
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| AUDIO_L | B11 | 0 / LVCMOS33 | R140.1 | B5 |
+| AUDIO_R | C11 | 0 / LVCMOS33 | R142.1 | B5 |
+| BTN_N0 | D14 | 1 / LVCMOS33 | R110.1, SW2.A, SW2.B, TP2.1 | B5 B11 |
+| BTN_N1 | E14 | 1 / LVCMOS33 | R111.1, SW3.A, SW3.B | B5 |
+| BTN_N2 | A15 | 1 / LVCMOS33 | R112.1, SW4.A, SW4.B | B5 |
+| BTN_N3 | B15 | 1 / LVCMOS33 | R113.1, SW5.A, SW5.B | B5 |
+| I2C_SCL | A10 | 0 / LVCMOS33 | R120.1, TP5.1, U9.SCL, U27.SCL/GPIO3 | B5 B7 B11 |
+| I2C_SDA | A11 | 0 / LVCMOS33 | R121.1, TP6.1, U9.SDA, U27.SDA/GPIO2 | B5 B7 B11 |
+| LED0 | A12 | 1 / LVCMOS33 | R100.1 | B5 |
+| LED1 | A13 | 1 / LVCMOS33 | R101.1 | B5 |
+| LED2 | B13 | 1 / LVCMOS33 | R102.1 | B5 |
+| LED3 | C13 | 1 / LVCMOS33 | R103.1 | B5 |
+| LED4 | D13 | 1 / LVCMOS33 | R104.1 | B5 |
+| LED5 | E13 | 1 / LVCMOS33 | R105.1 | B5 |
+| LED6 | A14 | 1 / LVCMOS33 | R106.1 | B5 |
+| LED7 | C14 | 1 / LVCMOS33 | R107.1 | B5 |
+| SW_N0 | C15 | 1 / LVCMOS33 | R114.1, SW6.1 | B5 |
+| SW_N1 | D15 | 1 / LVCMOS33 | R115.1, SW6.2 | B5 |
+| SW_N2 | E15 | 1 / LVCMOS33 | R116.1, SW6.3 | B5 |
+| SW_N3 | A16 | 1 / LVCMOS33 | R117.1, SW6.4 | B5 |
+
+### FPGA I/O: HDMI (GPDI)
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| GPDI_CLK_N | A8 | 0 / LVCMOS33D | J3.TMDS Clock-, U10.D1- | B6 |
+| GPDI_CLK_P | A7 | 0 / LVCMOS33D | J3.TMDS Clock+, U10.D1+ | B6 |
+| GPDI_D0_N | B8 | 0 / LVCMOS33D | J3.TMDS Data 0-, U10.D2- | B6 |
+| GPDI_D0_P | C8 | 0 / LVCMOS33D | J3.TMDS Data 0+, U10.D2+ | B6 |
+| GPDI_D1_N | D8 | 0 / LVCMOS33D | J3.TMDS Data 1-, U11.D1- | B6 |
+| GPDI_D1_P | E8 | 0 / LVCMOS33D | J3.TMDS Data 1+, U11.D1+ | B6 |
+| GPDI_D2_N | C7 | 0 / LVCMOS33D | J3.TMDS Data 2-, U11.D2- | B6 |
+| GPDI_D2_P | C6 | 0 / LVCMOS33D | J3.TMDS Data 2+, U11.D2+ | B6 |
+| GPDI_HPD | C9 | 0 / LVCMOS33 | R135.2, R136.1 | B6 |
+| GPDI_SCL | D9 | 0 / LVCMOS33 | R132.1, U12.SCL1 | B6 |
+| GPDI_SDA | E9 | 0 / LVCMOS33 | R133.1, U12.SDA1 | B6 |
+
+### FPGA I/O: PMOD, logic-analyser header, loopback, PLL test point
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| LA0 | C17 | 1 / LVCMOS33 | J9.1 | B11 |
+| LA1 | A17 | 1 / LVCMOS33 | J9.2 | B11 |
+| LA2 | B18 | 1 / LVCMOS33 | J9.3 | B11 |
+| LA3 | A18 | 1 / LVCMOS33 | J9.4 | B11 |
+| LA4 | B19 | 1 / LVCMOS33 | J9.5 | B11 |
+| LA5 | A19 | 1 / LVCMOS33 | J9.6 | B11 |
+| LA6 | B20 | 1 / LVCMOS33 | J9.7 | B11 |
+| LA7 | D11 | 1 / LVCMOS33 | J9.8 | B11 |
+| LOOP_A | E11 | 1 / LVCMOS33 | J10.1 | B11 |
+| LOOP_B | D12 | 1 / LVCMOS33 | J10.2 | B11 |
+| PMOD1_1 | C18 | 2 / LVCMOS33 | J5.1 | B11 |
+| PMOD1_2 | D18 | 2 / LVCMOS33 | J5.2 | B11 |
+| PMOD1_3 | F17 | 2 / LVCMOS33 | J5.3 | B11 |
+| PMOD1_4 | H18 | 2 / LVCMOS33 | J5.4 | B11 |
+| PMOD1_7 | D17 | 2 / LVCMOS33 | J5.7 | B11 |
+| PMOD1_8 | E17 | 2 / LVCMOS33 | J5.8 | B11 |
+| PMOD1_9 | G18 | 2 / LVCMOS33 | J5.9 | B11 |
+| PMOD1_10 | H17 | 2 / LVCMOS33 | J5.10 | B11 |
+| PMOD2_1 | C20 | 2 / LVCMOS33 | J6.1 | B11 |
+| PMOD2_2 | E20 | 2 / LVCMOS33 | J6.2 | B11 |
+| PMOD2_3 | G19 | 2 / LVCMOS33 | J6.3 | B11 |
+| PMOD2_4 | J19 | 2 / LVCMOS33 | J6.4 | B11 |
+| PMOD2_7 | D19 | 2 / LVCMOS33 | J6.7 | B11 |
+| PMOD2_8 | F19 | 2 / LVCMOS33 | J6.8 | B11 |
+| PMOD2_9 | H20 | 2 / LVCMOS33 | J6.9 | B11 |
+| PMOD2_10 | K19 | 2 / LVCMOS33 | J6.10 | B11 |
+| PMOD3_1 | L20 | 3 / LVCMOS33 | J7.1 | B11 |
+| PMOD3_2 | L16 | 3 / LVCMOS33 | J7.2 | B11 |
+| PMOD3_3 | N16 | 3 / LVCMOS33 | J7.3 | B11 |
+| PMOD3_4 | N17 | 3 / LVCMOS33 | J7.4 | B11 |
+| PMOD3_7 | M20 | 3 / LVCMOS33 | J7.7 | B11 |
+| PMOD3_8 | L17 | 3 / LVCMOS33 | J7.8 | B11 |
+| PMOD3_9 | M17 | 3 / LVCMOS33 | J7.9 | B11 |
+| PMOD3_10 | P16 | 3 / LVCMOS33 | J7.10 | B11 |
+| PMOD4_1 | N19 | 3 / LVCMOS33 | J8.1 | B11 |
+| PMOD4_2 | P20 | 3 / LVCMOS33 | J8.2 | B11 |
+| PMOD4_3 | T19 | 3 / LVCMOS33 | J8.3 | B11 |
+| PMOD4_4 | U18 | 3 / LVCMOS33 | J8.4 | B11 |
+| PMOD4_7 | N20 | 3 / LVCMOS33 | J8.7 | B11 |
+| PMOD4_8 | R20 | 3 / LVCMOS33 | J8.8 | B11 |
+| PMOD4_9 | R18 | 3 / LVCMOS33 | J8.9 | B11 |
+| PMOD4_10 | U17 | 3 / LVCMOS33 | J8.10 | B11 |
+| TP_PLL | E12 | 1 / LVCMOS33 | TP9.1 | B11 |
+
+### FPGA I/O: DDR3L
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| DDRAM_A0 | P2 | 6 / SSTL135_I | U30.A0 | B8 |
+| DDRAM_A1 | C4 | 7 / SSTL135_I | U30.A1 | B8 |
+| DDRAM_A2 | E5 | 7 / SSTL135_I | U30.A2 | B8 |
+| DDRAM_A3 | F5 | 7 / SSTL135_I | U30.A3 | B8 |
+| DDRAM_A4 | B3 | 7 / SSTL135_I | U30.A4 | B8 |
+| DDRAM_A5 | F4 | 7 / SSTL135_I | U30.A5 | B8 |
+| DDRAM_A6 | B5 | 7 / SSTL135_I | U30.A6 | B8 |
+| DDRAM_A7 | E4 | 7 / SSTL135_I | U30.A7 | B8 |
+| DDRAM_A8 | C5 | 7 / SSTL135_I | U30.A8 | B8 |
+| DDRAM_A9 | E3 | 7 / SSTL135_I | U30.A9 | B8 |
+| DDRAM_A10 | D5 | 7 / SSTL135_I | U30.A10/AP | B8 |
+| DDRAM_A11 | B4 | 7 / SSTL135_I | U30.A11 | B8 |
+| DDRAM_A12 | C3 | 7 / SSTL135_I | U30.A12/BC# | B8 |
+| DDRAM_A13 | A3 | 7 / SSTL135_I | U30.A13 | B8 |
+| DDRAM_A14 | D3 | 7 / SSTL135_I | U30.A14 | B8 |
+| DDRAM_BA0 | P5 | 6 / SSTL135_I | U30.BA0 | B8 |
+| DDRAM_BA1 | N3 | 6 / SSTL135_I | U30.BA1 | B8 |
+| DDRAM_BA2 | M3 | 6 / SSTL135_I | U30.BA2 | B8 |
+| DDRAM_CAS_N | L1 | 6 / SSTL135_I | U30.CAS# | B8 |
+| DDRAM_CKE | N2 | 6 / SSTL135_I | R340.1, U30.CKE | B8 |
+| DDRAM_CLK_P | M4 | 6 / SSTL135D_I | R341.1, U30.CK | B8 |
+| DDRAM_CS_N | K1 | 6 / SSTL135_I | U30.CS# | B8 |
+| DDRAM_DM0 | J4 | 6 / SSTL135_I | U30.LDM | B8 |
+| DDRAM_DM1 | H5 | 7 / SSTL135_I | U30.UDM | B8 |
+| DDRAM_DQ0 | L5 | 6 / SSTL135_I | U30.DQ0 | B8 |
+| DDRAM_DQ1 | F1 | 6 / SSTL135_I | U30.DQ1 | B8 |
+| DDRAM_DQ2 | K4 | 6 / SSTL135_I | U30.DQ2 | B8 |
+| DDRAM_DQ3 | G1 | 6 / SSTL135_I | U30.DQ3 | B8 |
+| DDRAM_DQ4 | L4 | 6 / SSTL135_I | U30.DQ4 | B8 |
+| DDRAM_DQ5 | H1 | 6 / SSTL135_I | U30.DQ5 | B8 |
+| DDRAM_DQ6 | G2 | 6 / SSTL135_I | U30.DQ6 | B8 |
+| DDRAM_DQ7 | J3 | 6 / SSTL135_I | U30.DQ7 | B8 |
+| DDRAM_DQ8 | D1 | 7 / SSTL135_I | U30.DQ8 | B8 |
+| DDRAM_DQ9 | C1 | 7 / SSTL135_I | U30.DQ9 | B8 |
+| DDRAM_DQ10 | E2 | 7 / SSTL135_I | U30.DQ10 | B8 |
+| DDRAM_DQ11 | C2 | 7 / SSTL135_I | U30.DQ11 | B8 |
+| DDRAM_DQ12 | F3 | 7 / SSTL135_I | U30.DQ12 | B8 |
+| DDRAM_DQ13 | A2 | 7 / SSTL135_I | U30.DQ13 | B8 |
+| DDRAM_DQ14 | E1 | 7 / SSTL135_I | U30.DQ14 | B8 |
+| DDRAM_DQ15 | B1 | 7 / SSTL135_I | U30.DQ15 | B8 |
+| DDRAM_DQS_P0 | K2 | 6 / SSTL135D_I | U30.LDQS | B8 |
+| DDRAM_DQS_P1 | H4 | 7 / SSTL135D_I | U30.UDQS | B8 |
+| DDRAM_ODT | L2 | 6 / SSTL135_I | U30.ODT | B8 |
+| DDRAM_RAS_N | P1 | 6 / SSTL135_I | U30.RAS# | B8 |
+| DDRAM_RESET_N | N4 | 6 / SSTL135_I | R339.1, U30.RESET# | B8 |
+| DDRAM_WE_N | M1 | 6 / SSTL135_I | U30.WE# | B8 |
+
+### FPGA I/O: Gigabit Ethernet (RGMII)
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| ETH_INT_N | K18 | 2 / LVCMOS33 | R362.1, U31.INTB/PMEB | B9 |
+| ETH_MDC | F20 | 2 / LVCMOS33 | U31.MDC | B9 |
+| ETH_MDIO | G20 | 2 / LVCMOS33 | R360.1, U31.MDIO | B9 |
+| ETH_RST_N | J18 | 2 / LVCMOS33 | R361.1, U31.PHYRSTB | B9 |
+| ETH_RX_CLK | J20 | 2 / LVCMOS33 | R352.1, U31.PHYAD1/RXC | B9 |
+| ETH_RX_CTL | K20 | 2 / LVCMOS33 | R353.1, U31.PHYAD2/RXCTL | B9 |
+| ETH_RX_DATA0 | E16 | 2 / LVCMOS33 | R356.1, U31.RXDLY/RXD0 | B9 |
+| ETH_RX_DATA1 | F16 | 2 / LVCMOS33 | R355.1, U31.TXDLY/RXD1 | B9 |
+| ETH_RX_DATA2 | E18 | 2 / LVCMOS33 | R354.1, U31.PLLOFF/RXD2 | B9 |
+| ETH_RX_DATA3 | F18 | 2 / LVCMOS33 | R351.1, U31.PHYAD0/RXD3 | B9 |
+| ETH_TX_CLK | G16 | 2 / LVCMOS33 | U31.TXC | B9 |
+| ETH_TX_CTL | H16 | 2 / LVCMOS33 | U31.TXCTL | B9 |
+| ETH_TX_DATA0 | J17 | 2 / LVCMOS33 | U31.TXD0 | B9 |
+| ETH_TX_DATA1 | J16 | 2 / LVCMOS33 | U31.TXD1 | B9 |
+| ETH_TX_DATA2 | D20 | 2 / LVCMOS33 | U31.TXD2 | B9 |
+| ETH_TX_DATA3 | E19 | 2 / LVCMOS33 | U31.TXD3 | B9 |
+
+### FPGA I/O: USB 2.0 ULPI
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| ULPI_CLK | L19 | 3 / LVCMOS33 | U32.CLKOUT | B10 |
+| ULPI_DATA0 | N18 | 3 / LVCMOS33 | U32.DATA0 | B10 |
+| ULPI_DATA1 | P17 | 3 / LVCMOS33 | U32.DATA1 | B10 |
+| ULPI_DATA2 | R16 | 3 / LVCMOS33 | U32.DATA2 | B10 |
+| ULPI_DATA3 | R17 | 3 / LVCMOS33 | U32.DATA3 | B10 |
+| ULPI_DATA4 | T16 | 3 / LVCMOS33 | U32.DATA4 | B10 |
+| ULPI_DATA5 | P19 | 3 / LVCMOS33 | U32.DATA5 | B10 |
+| ULPI_DATA6 | P18 | 3 / LVCMOS33 | U32.DATA6 | B10 |
+| ULPI_DATA7 | T20 | 3 / LVCMOS33 | U32.DATA7 | B10 |
+| ULPI_DIR | M19 | 3 / LVCMOS33 | U32.DIR | B10 |
+| ULPI_NXT | L18 | 3 / LVCMOS33 | U32.NXT | B10 |
+| ULPI_RST | U20 | 3 / LVCMOS33 | R373.1, U32.RESETB | B10 |
+| ULPI_STP | M18 | 3 / LVCMOS33 | U32.STP | B10 |
+
+### FPGA I/O: microSD
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| SD_CLK | E6 | 0 / LVCMOS33 | R386.1 | B10 |
+| SD_CMD | D6 | 0 / LVCMOS33 | J21.CMD(DI), R380.1 | B10 |
+| SD_DAT0 | E7 | 0 / LVCMOS33 | J21.DAT0(D0), R381.1 | B10 |
+| SD_DAT1 | D7 | 0 / LVCMOS33 | J21.DAT1(RSV), R382.1 | B10 |
+| SD_DAT2 | A6 | 0 / LVCMOS33 | J21.DAT2(RSV), R383.1 | B10 |
+| SD_DAT3 | B6 | 0 / LVCMOS33 | J21.CDDAT3(CS), R384.1 | B10 |
+| SD_DET_N | D10 | 0 / LVCMOS33 | J21.CD, R385.1 | B10 |
+
+### FPGA I/O: SFP and PCIe sideband
+
+| Net | U5 ball | Bank / standard | Endpoints | Blocks |
+|---|---|---|---|---|
+| PCIE_CLKREQ_N | B10 | 0 / LVCMOS33 | J12.B12, R305.1 | B7 |
+| PCIE_PERST_N | C10 | 0 / LVCMOS33 | J12.~PERST~, R304.1 | B7 |
+| PCIE_WAKE_N | A9 | 0 / LVCMOS33 | J12.~WAKE~ | B7 |
+| SFP_LOS | T18 | 3 / LVCMOS33 | J13.8, R321.1 | B7 |
+| SFP_MOD_ABS | U16 | 3 / LVCMOS33 | J13.6, R322.1 | B7 |
+| SFP_RS | T17 | 3 / LVCMOS33 | J13.7, J13.9 | B7 |
+| SFP_SCL | E10 | 0 / LVCMOS33 | J13.5, R323.1, U28.SCL/GPIO3 | B7 |
+| SFP_SDA | B9 | 0 / LVCMOS33 | J13.4, R324.1, U28.SDA/GPIO2 | B7 |
+| SFP_TX_DISABLE | U19 | 3 / LVCMOS33 | J13.3 | B7 |
+
+### FPGA dedicated: DDR3L complements (pin pair of board-file signals)
+
+| Net | U5 ball(s) | Endpoints | Blocks |
 |---|---|---|---|
-| CLK_25MHZ | X1.3 OUT | U5 [A7], TP_CLK25 | PCLKT0_0 |
-| JTAG_TCK | U7 ADBUS0 via R76 | U5 [T10], J2.3, R39 (PD) | |
-| JTAG_TDI | U7 ADBUS1 via R77 | U5 [R11], J2.5, R36 | |
-| JTAG_TDO | U5 [M10] | U7 ADBUS2 via R78, J2.4, R38 | |
-| JTAG_TMS | U7 ADBUS3 via R79 | U5 [T11], J2.6, R37 | |
-| UART_TX | U5 [B12] | U7 BDBUS1 (RXD) via R80, TP_UART_TX | FPGA → PC |
-| UART_RX | U7 BDBUS0 (TXD) via R81 | U5 [C12], TP_UART_RX | PC → FPGA |
-| UART_CTS_N | U7 BDBUS2 (RTS#) via R82 | U5 [E12] | |
-| UART_RTS_N | U5 [D12] | U7 BDBUS3 (CTS#) via R83 | |
-| CCLK / FLASH_CLK | U5 [N9] → R34 | U6.6 CLK, R33 (PU at CCLK), TP_FLASH_CLK | USRMCLK in user mode |
-| FLASH_MOSI | U5 [T8] | U6.5 DI/IO0 | |
-| FLASH_MISO | U6.2 DO/IO1 | U5 [T7] | |
-| FLASH_CS_N | U5 [N8] CSSPIN | U6.1 /CS, R60 (PU at flash), TP_FLASH_CS | |
-| FLASH_IO2 | U5 [M7] | U6.3 /WP, R61 | |
-| FLASH_IO3 | U5 [N7] | U6.7 /HOLD, R62 | |
-| PROGRAMN | U5 [R9] | SW1, R30, C59 | |
-| INITN | U5 [T9] | R31, TP_INITN | |
-| DONE | U5 [P9] | R32, R42→Q1, TP_DONE | |
-| CFG0, CFG2 | U5 [N10], [R10] | GND | CFG=010 |
-| CFG1 | U5 [P10] | R35 → 3V3 | |
-| LED[0..7] | U5 [B9 C9 D9 E9 A9 A10 B10 C10] | R100–R107 | |
-| BTN_N[0..3] | SW2–SW5, R110–R113 | U5 [D10 E10 B11 C11] | BTN_N0 also TP_RESET |
-| SW_N[0..3] | SW6, R114–R117 | U5 [D11 E11 A11 A12] | |
-| I2C_SCL / I2C_SDA | U5 [E5] / [D5] | U9.6 / U9.5, R120/R121, TPs | 0x50 |
-| AUDIO_L / AUDIO_R | U5 [C6] / [B6] | R140 / R142 | |
-| JACK_L / JACK_R | C142 / C145 | J4 tip / ring | |
-| GPDI_CLK_P/N | U5 [A3]/[A4] | U10, J3.10/J3.12 | LVCMOS33D |
-| GPDI_D0_P/N | U5 [C4]/[B4] | U10, J3.7/J3.9 | |
-| GPDI_D1_P/N | U5 [C5]/[B5] | U11, J3.4/J3.6 | |
-| GPDI_D2_P/N | U5 [A5]/[A6] | U11, J3.1/J3.3 | ✱ verify J3 pin numbers against C720616 drawing |
-| GPDI_SCL / GPDI_SDA | U5 [E4] / [D4] | U12 SCL1/SDA1, R132/R133 | |
-| HDMI_SCL_5V / HDMI_SDA_5V | U12 SCL2/SDA2 | J3.15 / J3.16, R130/R131 | |
-| HDMI_HPD → GPDI_HPD | J3.19 | R135/R136 → U5 [E6] | |
-| LA[0..7] | U5 [B13 C13 D13 E13 A13 A14 B14 A15] | J9.1–8 | |
-| TP_PLL | U5 [C8] | TP_PLL | |
-| LOOP_A / LOOP_B | U5 [E8] / [D8] | J10.1 / J10.2 | |
-| PMOD1[1..4,7..10] | U5 bank 7 [B1 C1 D1 G5 / B2 C2 E2 G4] | J5 | pairs (1,7)(2,8)(3,9)(4,10) |
-| PMOD2[…] | U5 bank 6 [L1 K4 N1 P1 / L2 K5 P2 R1] | J6 | |
-| PMOD3[…] | U5 bank 2 [B16 C16 D16 G12 / B15 C15 E15 G13] | J7 | |
-| PMOD4[…] | U5 bank 3 [L16 K13 N16 P16 / L15 K12 P15 R16] | J8 | |
-| USB_DP / USB_DN | J1 A6/B6, A7/B7 | U1, U7 DP/DM | |
-| CC1 / CC2 | J1 A5 / B5 | R1 / R2 | |
+| DDRAM_CLK_N | N5 | R342.1, U30.CK# | B8 |
+| DDRAM_DQS_N0 | J1 | U30.LDQS# | B8 |
+| DDRAM_DQS_N1 | G5 | U30.UDQS# | B8 |
 
-### Power
+### FPGA dedicated: Configuration and JTAG
 
-| Net | Source | Loads |
+| Net | U5 ball(s) | Endpoints | Blocks |
+|---|---|---|---|
+| CCLK | U3 | R33.1, R34.1 | B3 |
+| CFG1 | T4 | R35.1 | B3 |
+| DONE | Y3 | R32.1, R42.1, TP10.1 | B3 B11 |
+| INITN | V3 | R31.1, TP11.1 | B3 B11 |
+| PROGRAMN | W3 | C59.1, R30.1, SW1.A, SW1.B | B3 |
+| JTAG_TCK | T5 | J2.1, R39.1, R76.2 | B3 B4 |
+| JTAG_TDI | R5 | J2.2, R36.1, R77.2 | B3 B4 |
+| JTAG_TDO | V4 | J2.3, R38.1, R78.2 | B3 B4 |
+| JTAG_TMS | U5 | J2.4, R37.1, R79.2 | B3 B4 |
+
+### FPGA dedicated: DDR3 VREF to FPGA
+
+| Net | U5 ball(s) | Endpoints | Blocks |
+|---|---|---|---|
+| FPGA_VREF6 | K5 | C362.1, R334.2, R335.1 | B8 |
+| FPGA_VREF7 | B2 | C363.1, R336.2, R337.1 | B8 |
+
+### FPGA dedicated: SERDES (DCU0 CH0 = PCIe, DCU1 CH0 = SFP, DCU1 CH1 = SMA; DCU0 CH1 unused)
+
+| Net | U5 ball(s) | Endpoints | Blocks |
+|---|---|---|---|
+| REFCLK_D0_P | Y11 | U27.OUT1_P | B7 |
+| REFCLK_D0_N | Y12 | U27.OUT1_N | B7 |
+| REFCLK_D1_P | Y19 | U28.OUT1_P | B7 |
+| REFCLK_D1_N | W20 | U28.OUT1_N | B7 |
+| PCIE_HDTX_P | W4 | C322.1 | B7 |
+| PCIE_HDTX_N | W5 | C323.1 | B7 |
+| PCIE_RX_P | Y5 | J12.PERp0 | B7 |
+| PCIE_RX_N | Y6 | J12.PERn0 | B7 |
+| SFP_HDTX_P | W13 | R310.1 | B7 |
+| SFP_HDTX_N | W14 | R311.1 | B7 |
+| SFP_HDRX_P | Y14 | R312.2 | B7 |
+| SFP_HDRX_N | Y15 | R313.2 | B7 |
+| SMA_HDTX_P | W17 | C340.1 | B7 |
+| SMA_HDTX_N | W18 | C341.1 | B7 |
+| SMA_HDRX_P | Y16 | C342.2 | B7 |
+| SMA_HDRX_N | Y17 | C343.2 | B7 |
+
+CFG0 and CFG2 balls are tied to GND (no named net): CFG[2:0] = 010, SPI master. Unused FPGA balls, RESERVED W10/W11 and NC K16/K17 are no-connect.
+
+### Power rails
+
+| Rail | Pins | U5 balls | Blocks | Source / notes |
+|---|---|---|---|---|
+| 12V_OR | 15 | — | B1 | U20/U21 LM74700 ideal-diode OR of 12 V jack and slot 12 V |
+| 12V_SLOT | 12 | — | B1 B7 | J12 PCIe edge +12V (via U21) |
+| 5V_SYS | 23 | — | B1 B6 B10 | U23 TPS2121 mux: U22 LMR33630 5 V buck / USB-C #1 VBUS |
+| 3V3 | 143 | 12 | B1 B2 B3 B4 B5 B6 B7 B9 B10 B11 | U2 TPS62826 |
+| 1V2 | 35 | 20 | B1 B2 B3 | U3 TPS62827 (FPGA VCC) |
+| 1V35 | 47 | 6 | B1 B2 B3 B8 | U24 TLV62569 via RS4 (DDR3L, VCCIO6/7) |
+| 1V8 | 14 | — | B1 B7 B10 | U25 TLV62569 (USB3320 VDD18, feeds U26) |
+| 1V2_SER | 30 | 12 | B1 B2 B3 | U26 TPS7A91 LDO from 1V8 (VCCA, VCCHRX, VCCHTX) |
+| 2V5 | 3 | — | B1 B3 | U4 AP2112-2.5 via RS3; enabled by EN_2V5 |
+| VCCAUX | 10 | 4 | B2 B3 | 2V5 via FB2 |
+| VCCAUXA | 10 | 4 | B2 B3 | 2V5 via FB20 (SERDES aux) |
+| 5V_HDMI | 6 | — | B6 | U13 TPS2051 from 5V_SYS |
+| USB2_VBUS | 6 | — | B10 | J20 VBUS; U33 TPS2051 sources it in host mode |
+| SLOT_3V3 | 4 | — | B7 | J12 +3.3V (slot) |
+| EN_2V5 | 3 | — | B1 | U26 PG (open drain) + R450 100 k to 3V3 → U4 EN: VCCA before VCCAUXA |
+| GND | 513 | 87 | B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 | all |
+
+### Other inter-block nets (no FPGA ball)
+
+| Net | Endpoints | Blocks |
 |---|---|---|
-| VBUS → 5V_SYS | J1 VBUS → F1 | D1, C1, C2, U2, U3, U13 (total VBUS capacitance 22 + 2×10 µF ≈ 42 µF nominal, ≈ 20 µF effective at 5 V bias: above the 10 µF USB guideline, accepted and common on dev boards; PTC limits inrush) |
-| 3V3_PRE → 3V3 | U2 + L1 → RS1 | see §1 power distribution |
-| 1V2 (B1, TPS62827) | U3 + L2 → RS2 (FB sensed at 1V1) | U5 VCC ×6 |
-| 2V5_PRE → 2V5 → VCCAUX | U4 → RS3 → FB2 | U5 VCCAUX ×2 |
-| 5V_HDMI | U13 OUT | J3.18, R130/R131, U12 VREF2 path |
-| 1V8_FT | U7 VREGOUT | U7 VCORE |
-| GND | J1 GND/shield | all |
+| FLASH_CLK | R34.2, TP7.1, U6.CLK | B3 B4 B11 |
+| PWR_ST | TP12.1, U23.ST | B1 B11 |
+| USB_DN | J1.DN1, J1.DN2, U1.3, U1.4, U7.DM | B1 B4 |
+| USB_DP | J1.DP1, J1.DP2, U1.1, U1.6, U7.DP | B1 B4 |
 
 ---
 
