@@ -23,8 +23,9 @@
 > - **SFP:** J13 TE 1888247-1 and J14 cage 2227302-1 (LCSC stock 0: consign); R310–R313 0 Ω data links; L30/L31 4.7 µH with C330–C335 VccT/VccR filters; R320–R324 4.7 k pull-ups on TX_FAULT, LOS, MOD_ABS, SCL, SDA.
 > - **SMA:** J15–J18 Molex 73251-1150 and C340–C343 100 nF on TX and RX (DCU1 CH1).
 > - **J12 PCIe x4 edge placed (2026-11-20)** at (4385, 2530), uid gge7064. Device `Bus_PCI_Express_x4` was imported from KiCad (zip → Extract Libraries → project library) and placed by the user. Its 64 pins match the CEM x4 pinout: A1 PRSNT1#, A11 PERST#, A13/A14 REFCLK±, A16/A17 PERp/n0 (card RX), B14/B15 PETp/n0 (card TX: FPGA HDTX → C322/C323 → B14/B15), B17 and B31 PRSNT2#, B12 RSVD (= CLKREQ# in later CEM revisions).
->   - ⚠ The KiCad symbol stacks all GND (21), +12V (5) and +3.3V (3) pins at one point each; confirm in the C3 netlist that each stack joins one net.
->   - ⚠ **The device's Footprint field is empty**: bind `BUS_PCIexpress_x4` to it. Untick 'Add into BOM', because the fingers are PCB copper and not a purchased part.
+>   - **Fixed (v2, 2026-11-20):** the KiCad symbol stacked all GND (21), +12V (5) and +3.3V (3) pins at one point each, which EasyEDA showed as overlapping pins and 10 fatal DRC errors. It was replaced by the generated device `PCIe_x4_Edge` (`hardware/EDA/import/PCIe_x4_Edge_v2.zip`): 64 pins at 64 unique positions, power pins along the top, GND along the bottom, widened body.
+>   - Footprint `BUS_PCIexpress_x4` is bound on the instance. Saved-file check: 64 pads, and pad numbers equal pin numbers (A1–A32, B1–B32). J12 at (4375, 2550), uid gge7064.
+>   - Open: the library device's own Footprint field is still empty (the instance binding is what counts); set 'Add into BOM' = No. KiCad provides no 3D model, which is correct for PCB fingers.
 > - (history) Missing until now: J12, the PCIe x4 card edge. No device exists in the EasyEDA library, and the MCP cannot create symbols or footprints. KiCad's `Bus_PCI_Express_x4` symbol (64 pins) and `BUS_PCIexpress_x4` footprint (64 pads) are downloaded to `hardware/EDA/import/` for the user to import (EasyEDA Pro: File → Import → KiCad) as a project device.
 
 **Date started:** 2026-11-20
