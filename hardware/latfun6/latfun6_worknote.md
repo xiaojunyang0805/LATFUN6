@@ -44,6 +44,14 @@
 > - Straps, all 4.7 k: R351 RXD3↑ (PHYAD0), R352 RXC↓, R353 RXCTL↓, R354 RXD2↓ (PLLOFF), R355 RXD1↑ (TXDLY), R356 RXD0↑ (RXDLY), R357 LED0↑ (CFG_EXT), R358 LED1↓, R359 LED2↓ (CFG_LDO = 00 ⇒ 3.3 V RGMII).
 > - Other resistors: R360 1.5 k MDIO pull-up; R361 10 k PHYRSTB pull-down; R362 4.7 k INTB pull-up; R350 2.49 k RSET (pin 39); R363/R364 510 Ω for the jack LEDs (LED0 active-low, LED1 active-high); C381 100 nF centre-tap (J19 pin 1).
 
+> **B6 HDMI, B11 headers placed; B2 re-arranged (2026-11-20).** Saved-file check passed: 418 parts, no duplicates or overlaps, all inside frames.
+> - **B6 (gge11001–11015):** J3 HDMI-001S (C720616), U10/U11 TPD4E05U06 (C138714), U12 PCA9306 (C33196), U13 TPS2051C (C129581), R130/R131 2.2 k, R132/R133 4.7 k, R134 200 k (C25764), R135 10 k / R136 20 k HPD divider (C25765), C130/C132 100 nF, C131 1 µF.
+> - **B11 (gge12001–12018):** J5–J8 A2541HWR-2x6P female right-angle PMOD (C5333437 ⚠ low stock), J9 A2541WV-2x5P male 2×5 LA header (C225520, replaces the female C843271), J10 A2541WV-2P loopback (C225477).
+> - **B11 test points:** TP1–TP12 RH-5015 SMD (C5199798). TP1 CLK25, TP2 RESET, TP3 UART_TX, TP4 UART_RX, TP5 SCL, TP6 SDA, TP7 FLASH_CLK, TP8 FLASH_CS, TP9 PLL, TP10 DONE, TP11 INITN, TP12 PWR_ST (TPS2121 ST).
+> - **B2 re-arranged (user: "too squeezed"):** U5's 10 sub-parts re-created in a new right column, frame x 4650–6600 / y 40–3280, laid out 3 per row (.1 .2 .5 / .6 .7 .8 / .3 .4 .10 .9) with ≈ 370 / ≈ 600-unit gaps. Each sub-part keeps designator U5 and uid gge5001. B3's frame grew into the old B2 area (y 150–1920).
+> - ⚠ **Sheet must be set to a custom size of about 1700 × 841 mm** (Page → Size). B2's right edge is at 6600 units = 1676 mm, beyond A0's 1189 mm.
+> - Still to place: B5 audio (J4, R140–R143, C140–C145).
+
 > **B10 USB 2.0 + microSD placed (2026-11-20):** 33 parts (gge10001–10033) inside the B10 frame; saved-file check passed (385 parts total, no duplicates or overlaps, all inside frames).
 > - U32 USB3320C-EZK-TR (C132156). Y5 24 MHz 12 pF crystal (C5181479; the library search for C70590 returned a SIM socket, an E7 catch) with C390/C391 18 pF and R370 1 M across XI–XO.
 > - ⚠ **Check Y5's ESR at A2**: the USB3320 needs ≤ 30 Ω, and YXC's alternative is listed at 50 Ω.
