@@ -89,6 +89,84 @@ U5 bank 7/6/2/3 ─ PMOD1/2/3/4 (J5–J8), A/B diff pairs, pin k ↔ pin k+6
 
 ## Section 2 — Master Component Table
 
+### Block B1 v0.2 — Power (rebuild, 2026-11-20). Supersedes "Block A" and "Block B" below for every designator listed here.
+
+Sources: LMR33630 SNVSB6x Table 9-2/9-3 (1.4 MHz, 5 V); TPS6282x SLVSEF9I Table 8-2 / Eq. 4–5; TPS7A91 SBVS282A front page (2.0 → 1.2 V) and §7; TPS2121 SLVSEA3F Eq. 2 / §10.2.4; LM74700-Q1 SNOSD17G §10.1.1.2.3. Stock: JLCPCB API, 2026-11-20.
+
+**12 V entry and OR**
+| Desig | Value | Pkg | LCSC (stock) | Function | Nets |
+|---|---|---|---|---|---|
+| J11 | PJ-002AH-SMT-TR, 12 V DC jack | SMT | C22434687 (204) EXT | bench 12 V | pin1 (centre) JACK_RAW, sleeve GND |
+| F2 | 0466003.NRHF 3 A 32 V | 1206 | C14165 (17.7k) | jack fuse | JACK_RAW → JACK_F |
+| D4 | SMBJ15A | SMB | C113988 (86k) | jack TVS (15 V standoff, 24.4 V clamp) | K JACK_F, A GND |
+| U20 | LM74700QDBVRQ1 | SOT-23-6 | C2941042 (8.8k) | jack ideal diode | ANODE JACK_F, CATHODE 12V_OR, GATE G_JACK, EN JACK_F, VCAP |
+| Q20 | CSD17575Q3 30 V | SON3.3 | C529277 (7.2k) | jack OR FET | S JACK_F, D 12V_OR, G G_JACK |
+| C200 | 100 nF 50 V | 0402 | C307331 | U20 VCAP (≥ 0.1 µF) | VCAP_J–JACK_F |
+| C201 | 100 nF 50 V | 0402 | C307331 | U20 input (≥ 22 nF) | JACK_F–GND |
+| U21 | LM74700QDBVRQ1 | SOT-23-6 | C2941042 | slot ideal diode | ANODE 12V_SLOT, CATHODE 12V_OR, GATE G_SLOT, EN SLOT_EN |
+| Q21 | CSD17575Q3 | SON3.3 | C529277 | slot OR FET | S 12V_SLOT, D 12V_OR |
+| C202, C203 | 100 nF 50 V | 0402 | C307331 | U21 VCAP / input | |
+| R200 | 100 kΩ | 0402 | C25741 | SLOT_EN pull-up | 12V_SLOT–SLOT_EN |
+| Q22 | 2N7002 | SOT-23 | C8545 BASIC | jack present ⇒ slot path off (jack priority) | D SLOT_EN, S GND, G JACK_DET |
+| R201, R202 | 100 kΩ / 47 kΩ | 0402 | C25741 / C25792 | JACK_DET divider (3.8 V at 12 V) | JACK_F–JACK_DET–GND |
+| C204 | 22 µF 25 V | 1206 | C12891 | 12V_OR bulk | |
+
+**12 V → 5 V (LMR33630BDDA, 1.4 MHz)**
+| Desig | Value | Pkg | LCSC | Function | Nets |
+|---|---|---|---|---|---|
+| U22 | LMR33630BDDAR | HSOIC-8 | C544370 (2.9k) | 12 → 5 V 3 A | VIN 12V_OR, EN 12V_OR, SW, BOOT, VCC, FB, PG (TP) |
+| L20 | 2.2 µH 5.5 A SWPA5040S2R2NT | 5040 | C96923 (2.9k) | buck inductor (DS 2.2 µH @ 1.4 MHz) | SW–5V_12 |
+| C205 + C206 | 10 µF 25 V + 220 nF 50 V | 1206 / 0402 | C13585 / C1532? | CIN + CHF | 12V_OR–GND |
+| C207 | 100 nF | 0402 | C1525 | CBOOT | BOOT–SW |
+| C208 | 1 µF | 0402 | C52923 | CVCC | VCC–GND |
+| C209–C212 | 22 µF 10 V | 0805 | C45783 | COUT 4 × 22 µF (Table 9-3) | 5V_12–GND |
+| R203 / R204 | 100 kΩ / 24.9 kΩ 1 % | 0402 | C25741 / C25996? | FB → 5.02 V | 5V_12–FB–GND |
+
+**5 V OR (TPS2121): IN1 = 5V_12 (priority), IN2 = VBUS_F (USB-C #1)**
+| Desig | Value | Function |
+|---|---|---|
+| U23 | TPS2121RUXR C485916 (31k) | OUT = 5V_SYS |
+| R205 | 22.1 kΩ 1 % | RILM → I_LM ≈ 3.5 A (Eq. 2: 65.2 / R^0.861 → R 22.2 k) |
+| R206 / R207 | 32.4 kΩ / 10 kΩ 1 % | PR1 divider on IN1: switch to IN2 below 4.49 V |
+| R208 / R209 | 47 kΩ / 10 kΩ 1 % | OV1 divider (IN1 OVP 6.04 V) |
+| R210 / R211 | 47 kΩ / 10 kΩ 1 % | OV2 divider (IN2/VBUS OVP 6.04 V) |
+| C213 | 1 µF | SS (≈ 0.8 V/ms) |
+| C214 / C215 | 10 µF / 22 µF | IN2 / OUT caps |
+| CP2 → GND, ST → TP_PWR_ST |
+
+**USB-C #1 entry (kept from v0.1 except F1):** J1, U1, D1, C1, C2, R1, R2 unchanged. **F1 → SMD1812P300TF 3 A 8 V PTC (C21004, 3.3k)**, since the v0.1 1.1 A part cannot carry the 2.4 A worst case.
+
+**Point-of-load**
+| Desig | Value | LCSC | Function |
+|---|---|---|---|
+| U2 | **TPS62826DMQR** 3 A | C2073319 (22k) | 5V_SYS → 3V3 (replaces TLV62569) |
+| L1 | 0.47 µH 6.2 A CKCS5020 | C5120874 (2.2k) | U2 inductor |
+| C10 / C11, C12 | 4.7 µF / 2 × 10 µF | C19666? / C19702 | U2 in / out (Table 8-2) |
+| C13 | 120 pF | C1546? | U2 feed-forward (R2 = 100 k) |
+| R10 / R11 | 453 kΩ / 100 kΩ 1 % | — | FB 3.32 V, sensed after RS1 |
+| U3 | **TPS62827DMQR** 4 A | C2071448 (370) | 5V_SYS → 1V2 core (replaces TLV62569) |
+| L2 | 0.47 µH 6.2 A CKCS5020 | C5120874 | U3 inductor |
+| C14 / C15, C19, C20 | 4.7 µF / 3 × 10 µF | | U3 in / out (Table 8-2: 3 × 10 µF for -27) |
+| C21 | 120 pF | | U3 feed-forward |
+| R12 / R13 | **100 kΩ / 100 kΩ** 1 % | C25741 | FB 1.200 V, sensed after RS2 |
+| R14 / C16 | 100 kΩ / 100 nF | | U3 EN from 3V3 (VCCIO before VCC) |
+| RS2 | **20 mΩ 1 % 1206 0.5 W** | TBD | 1V2 shunt (2.75 A ⇒ 55 mV, 0.15 W; old 100 mΩ part would dissipate 0.76 W) |
+| U24 | TLV62569DBVR | C141836 | 5V_SYS → 1V35 (DDR3L, VCCIO6/7) |
+| L21, C220, C221 | 2.2 µH C135262 / 4.7 µF / 2 × 22 µF | | as U2 v0.1 |
+| R220 / R221 | 124 kΩ / 100 kΩ 1 % | | FB 1.344 V (DDR3L 1.283–1.45 V) after RS4 |
+| RS4 | 50 mΩ 1 % | C247602 | 1V35 shunt |
+| U25 | TLV62569DBVR | C141836 | 5V_SYS → 1V8 (USB3320 VDD18, 1V2_SER source) |
+| L22, C222, C223 | 2.2 µH / 4.7 µF / 22 µF | | |
+| R222 / R223 | 200 kΩ / 100 kΩ 1 % | | FB 1.800 V |
+| U26 | **TPS7A9101DSKR** | C2878140 (1.6k) | 1V8 → 1V2_SER (VCCA/VCCHTX/VCCHRX) |
+| C224 / C225 | 10 µF / 10 µF | | CIN / COUT |
+| C226 / C227 | 100 nF / 10 nF | | CNR/SS / CFF |
+| R224 / R225 | 5.9 kΩ / 11.8 kΩ 1 % | | FB 1.200 V (front-page values) |
+| U4, C17, C18, RS3 | AP2112K-2.5 + caps + 1 Ω shunt | (kept) | 3V3 → 2V5 |
+| D2, R15 | power LED | (kept) | |
+
+C-numbers marked "?" are resolved at placement (S3 E7 check).
+
 ### Block A — USB-C power entry
 
 | Desig | Value | Pkg | LCSC | Function | Pin1 Net | Pin2 Net |
