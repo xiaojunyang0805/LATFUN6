@@ -31,13 +31,13 @@ Supply check (2026-11-20): DigiKey LFE5UM5G-45F-8BG381C **44 pcs, $78.21**; -8BG
 | R1–R21 | Clock, LEDs, buttons, DIP, UART, JTAG, flash, config, EEPROM, audio, HDMI, PMOD, LA header, test points, shunts, loopback, LEDs, self-test, holes, board.json | as v0.1 | unchanged except: core rail is **1.2 V** (ECP5-5G), EEPROM also stores the **Ethernet MAC** | M |
 | R23 | **SFP cage** on SERDES DCU1 CH0 | 1000BASE-X / 2.5GBASE-X Ethernet, fibre/DAC loopback, BER with real optics | TX AC-coupled; SFP control (TX_DISABLE, LOS, MOD_ABS, RS) + module I²C at 3.3 V; 3.3 V supply with SFP filter | M |
 | R24 | **2 SMA pairs** (TX±, RX±) on DCU1 CH1 | cable loopback, eye/BER with instruments, board-to-board links | AC-coupled, 100 Ω diff, edge-launch SMA | M |
-| R25 | **PCIe x1 edge** on DCU0 CH0 | Gen1/Gen2 endpoint: PC accelerator, DMA labs. **No open ECP5 PCIe endpoint today** (LitePCIe: Xilinx/Cyclone V only); labs use Lattice's endpoint IP or the experimental open Gen1 core (Yumewatari / ECP5-PCIe GSoC). Finishing an open ECP5 PCIe endpoint is a **flagship frontier project** of the course (decision 2026-11-20) | **Gen2 needs a 200 MHz REFCLK** (multiplier ≤ 25×, TN-02206 Tab 6.1): slot 100 MHz HCSL → ×2 clock multiplier (SSC-tracking) → REFCLK_D0, as on Lattice's ECP5-5G Versa; slot clock direct = Gen1 only. TX AC caps 100 nF on card; PERST#, WAKE#, CLKREQ# sideband; **card outline = PCIe low-profile add-in card** | M |
+| R25 | **PCIe edge, x4 low-profile form factor, lane 0 only** (links as x1) on DCU0 CH0 | Gen1/Gen2 endpoint: PC accelerator, DMA labs. **No open ECP5 PCIe endpoint today** (LitePCIe: Xilinx/Cyclone V only); labs use Lattice's endpoint IP or the experimental open Gen1 core (Yumewatari / ECP5-PCIe GSoC). Finishing an open ECP5 PCIe endpoint is a **flagship frontier project** of the course (decision 2026-11-20) | **Gen2 needs a 200 MHz REFCLK** (multiplier ≤ 25×, TN-02206 Tab 6.1): slot 100 MHz HCSL → ×2 clock multiplier (SSC-tracking) → REFCLK_D0, as on Lattice's ECP5-5G Versa; slot clock direct = Gen1 only. TX AC caps 100 nF on card; PERST#, WAKE#, CLKREQ# sideband; **card outline = PCIe x4 low-profile add-in card** (25 W class; fits x4/x8/x16 and open-ended x1 slots); lanes 1–3 fingers unconnected; **A1 PRSNT1# tied to B31 PRSNT2#** (x4 end), B17 left open — verify against CEM at A2 | M |
 | R26 | **DDR3L x16, 4 Gb (512 MB)**, MT41K256M16 | Linux on LiteX (VexRiscv/NaxRiscv), framebuffers, capture buffers | banks 6+7 at 1.35 V, DQS groups; VREF divider; no VTT island (single point-to-point x16, ODT on both ends) | M |
 | R27 | **Gigabit Ethernet RJ45**, RTL8211F RGMII + magjack | LiteEth, Linux networking, remote labs | RGMII at 3.3 V, 125 MHz; MDC/MDIO, PHY reset/int; MAC from EEPROM | M |
 | R28 | **microSD** | Linux rootfs, data logging, SD-mode and SPI labs | 4-bit SD + detect, 3.3 V | M |
 | R29 | **USB 2.0 ULPI PHY** + second USB-C (device/host) | LiteX USB, Linux gadget/host, USB protocol labs | USB3320-class, 12-pin ULPI at 3.3 V, 60 MHz from PHY; VBUS switch for host mode | M |
 | R30 | SERDES reference clock | SFP/SMA lanes | **I²C-programmable low-jitter clock generator** (LVDS, from crystal) → REFCLK_D1: 125 MHz (1.25/2.5 G), 250 MHz (5 G, 20×), 156.25 MHz etc. A fixed 125 MHz osc caps the lanes at 3.125 Gb/s (25× max). Shares the EEPROM I²C bus; no new FPGA pins | M |
-| R31 | Dual power entry | standalone on USB-C, or powered from the PCIe slot | 12 V slot → 5 V buck (LMR33630); USB-C 5 V; TPS2121 power mux into 5V_SYS, **12 V path has priority** (USB-C on a PC port for JTAG must not become the supply); no back-feed. **x1 slot budget: 12 V ≤ 0.5 A, 3.3 V ≤ 3 A, ≤ 10 W total** **Budget calculated in [power_budget.md](power_budget.md): typical 5.2 W, worst 11.4 W (45F) / 13.6 W (85F) > 10 W x1 limit ⇒ power-entry decision pending (x4 low-profile edge 25 W vs x1 10 W with slot-3.3 V split + slot envelope).** Regulators re-sized for headroom (core 4 A-class, 3V3 3 A-class) | M |
+| R31 | Triple power entry | PCIe slot, bench 12 V jack, or USB-C | **12 V side:** slot 12 V and a **5.5/2.1 mm 12 V DC jack** (centre +, TVS + reverse-polarity protection) ORed by TPS2121 #1 (jack priority, no back-feed into the slot); → LMR33630 5 V 3 A. **5 V side:** 12 V-derived 5 V and USB-C #1 VBUS ORed by TPS2121 #2 (12 V path priority) → 5V_SYS. Budget in [power_budget.md](power_budget.md): typical 5.2 W, worst 11.4 W (45F) / 13.6 W (85F), all inside the **25 W x4 slot limit** (decision 2026-11-20). USB-C alone needs a 5 V / 3 A adapter for heavy designs. Regulators sized ≥ 1.3× W85 (core 4 A-class, 3V3 3 A-class) | M |
 | R32 | DCU0 CH1 (4th lane) | spare | AC-cap pads + test points, or second SMA pair (decide at layout) | C |
 | X1 | ~~SDRAM~~ | now covered by R26 | | — |
 | X2 | ~~SERDES out~~ | now R23–R25 | | — |
@@ -47,11 +47,12 @@ Supply check (2026-11-20): DigiKey LFE5UM5G-45F-8BG381C **44 pcs, $78.21**; -8BG
 ## 3. Block diagram
 
 ```
-USB-C #1 (5 V, FT2232H) ─┐                       ┌─ DDR3L x16 512 MB (banks 6+7, 1.35 V)
-PCIe slot 12 V ─ buck 5V ┼─ power OR ─ 5V_SYS ─┐ │
-                          │                     ├─ bucks/LDOs: 3V3 · 1V2 core · 1V35 DDR · 2V5 AUX · 1V2 SERDES (clean)
-FT2232H ── JTAG/UART ─────┴──────────── ECP5-5G LFE5UM5G-45F (CABGA381)
-                                          ├─ DCU0 CH0 ── PCIe x1 edge (REFCLK_D0 ← slot 100 MHz ×2 = 200 MHz)
+slot 12 V ──┐
+12 V jack ──┴─ OR #1 ─ buck 5 V ─┐
+USB-C #1 VBUS ───────────────────┴─ OR #2 ─ 5V_SYS ─┬─ bucks/LDOs: 3V3 · 1V2 core · 1V35 DDR · 1V8 · 1V2 SERDES · 2V5
+USB-C #1 data ─ FT2232H ─ JTAG/UART ─┐              │                 ┌─ DDR3L x16 512 MB (banks 6+7, 1.35 V)
+                                     └──────── ECP5-5G LFE5UM5G-45F (CABGA381)
+                                          ├─ DCU0 CH0 ── PCIe edge, x4 form / x1 link (REFCLK_D0 ← slot 100 MHz ×2 = 200 MHz)
                                           ├─ DCU1 CH0 ── SFP cage          ┐ REFCLK_D1 ← I²C clock gen (125/250 MHz)
                                           ├─ DCU1 CH1 ── SMA TX±/RX±       ┘
                                           ├─ RGMII ── RTL8211F ── RJ45 magjack
@@ -86,7 +87,7 @@ Margin ≈ 12 I/O on 3.3 V banks; 16 unused 1.35 V balls in banks 6/7. If the pi
 
 | Rail | Source | Loads | Notes |
 |---|---|---|---|
-| 5V_SYS | USB-C #1 VBUS **or** 12 V slot → LMR33630 5 V, through TPS2121 (12 V path priority) | all regulators, HDMI 5 V, USB-C #2 VBUS (host mode, switched) | slot mode ≤ 6 W from 12 V (x1 limit 0.5 A) ⇒ design budget ≈ 5 W; no back-feed |
+| 5V_SYS | (slot 12 V ∥ 12 V jack → TPS2121 #1) → LMR33630 5 V, ORed with USB-C #1 VBUS by TPS2121 #2 (12 V path priority) | all regulators, HDMI 5 V, USB-C #2 VBUS (host mode, switched) | worst 2.44 A (85F); TPS2121 limit ≈ 3.5 A; x4 slot 25 W |
 | 3V3 | buck (existing U2) | VCCIO 0/1/2/3/8, FT2232H, PHY, ULPI PHY, SFP (filtered), SD, flash, PMOD | current up from v0.1: ≈ 1.5 A budget; inductor/rating re-checked |
 | 1V2 | buck (existing U3, **FB changed for 1.2 V**) | ECP5-5G VCC core | FB sensed after shunt |
 | 1V2_SER | **dedicated low-noise LDO** (TPS7A91-class, from 3V3) | VCCA0/1 (±3 %), VCCHTX ×4 / VCCHRX ×4 via 120 Ω beads | must not share VCC core (DS Tab 3.2 note 2, TN-02038 Tab 16.1); ≈ 150 mA per DCU at 5 G; each pin 10 µF + 100 nF |
@@ -99,13 +100,13 @@ Sequencing: VCCIO before or with VCC/VCCAUX (TN-02038 §4), DDR3L per JEDEC (VDD
 
 ## 6. Physical targets
 
-- **PCIe x1 low-profile add-in card** (≤ 68.9 × 167.65 mm), bracket optional; also usable on the bench (USB-C power, rubber feet).
+- **PCIe x4 low-profile add-in card** (≤ 68.9 × 167.65 mm, x4 finger length, only lane 0 wired), bracket optional; also usable on the bench (12 V jack or USB-C power, rubber feet).
 - **6 layers** (SIG/GND/SIG/PWR/GND/SIG): BG381 0.8 mm escape, DDR3 point-to-point, 100 Ω SERDES/PCIe/HDMI pairs, 90 Ω USB, solid references.
 - Connectors: PCIe fingers on the bottom edge; bracket edge: SFP, RJ45, HDMI, USB-C #1/#2 (or USB on the opposite edge if the bracket gets crowded); SMA, PMODs, audio, LA header on the top/inner edges.
 
 ## 7. Cost (estimate, qty 10)
 
-FPGA ≈ $80 (consigned) · DDR3L ≈ $20 · FT2232H ≈ $13.5 · RTL8211F + magjack ≈ $4 · USB3320 ≈ $2 · SFP cage + SMA ≈ $5 · clock generators ≈ $8 · power ≈ $8 · passives/connectors ≈ $15 ⇒ **BOM ≈ $150**, plus 6-layer PCB + assembly. Target retail well under the ULX3S-85F class ($275) with far more capability.
+FPGA ≈ $80 (consigned) · DDR3L ≈ $20 · FT2232H ≈ $13.5 · RTL8211F + magjack ≈ $4 · USB3320 ≈ $2 · SFP cage + SMA ≈ $5 · clock generators ≈ $8 · power ≈ $11 (2 × TPS2121, 12 V jack) · passives/connectors ≈ $15 ⇒ **BOM ≈ $150**, plus 6-layer PCB + assembly. Target retail well under the ULX3S-85F class ($275) with far more capability.
 
 ## 8. Re-baseline impact on the v0.1 schematic
 
@@ -146,7 +147,7 @@ Primary sources: Lattice FPGA-DS-02012 v3.4 [DS], FPGA-TN-02038 v2.1 [CL], FPGA-
 - RESETB has no internal pull: the FPGA drives it, plus an external pull-down. RVBUS 10 kΩ (device) / 1 kΩ (OTG). ID to VDD33 unless host. DP/DM have internal ±8 kV ESD.
 - USB-C #2: 5.1 kΩ Rd per CC for device. Host needs Rp plus a current-limited VBUS switch (CPEN); full dual-role needs a CC controller (TUSB320-class). Decide at A2.
 
-**PCIe x1 card edge**
+**PCIe card edge** (x1 signal pins; the x4 form factor adds pins 19–32, lanes 1–3 unconnected, PRSNT2# at B31)
 - B1–B3 12 V; A9/A10/B8 3.3 V; B10 3.3Vaux (optional); A11 PERST#; B11 WAKE#; B12 CLKREQ#; A13/A14 REFCLK±; B14/B15 PETp/n0 (card TX, caps here); A16/A17 PERp/n0 (card RX); **A1 PRSNT1# tied to B17 PRSNT2#**.
 - JTAG and SMBus fingers are left open.
 - Low profile ≤ 167.65 × 68.90 mm, 1.57 mm board, 1.0 mm finger pitch, hard gold, 45° bevel.

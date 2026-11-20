@@ -110,8 +110,8 @@ The second architecture feeds the 1V2/1V35/1V8 bucks from the slot's 3.3 V pins 
 | 5V_SYS | 2.06 A | 2.44 A | LMR33630 3 A; TPS2121 limit set ≈ 3.5 A | 3 A | 1.23× (USB-C 3 A source) |
 | USB-C #1 entry | 2.06 A | 2.44 A | F1 / connector / U1 path must be rated 3 A | 3 A | re-check F1 at A2 |
 
-## Power-entry recommendation
+## Power-entry decision (2026-11-20): x4 low-profile edge + 12 V DC jack (user chose option 1)
 
-- **Recommended: x4 low-profile edge (lane 0 wired) + optional 12 V DC jack for the bench.** The 25 W slot budget covers every scenario including W85, at 13.6 W, which is 54 % of the limit. The supply stays simple: 12 V only, with no 3.3 V split. The jack gives a clean bench supply independent of USB, and is ORed with the slot 12 V through a second TPS2121, which handles up to 22 V. Cost ≈ +$2 and 14 mm more finger length. The board then no longer fits closed-end x1 slots.
-- **Alternative: stay x1 low-profile at 10 W.** This adds the 3.3 V split above (≈ +$1.5). Typical stays at ≈ 5.0 W, 50 % of the limit. Slot mode then needs a documented envelope of ≤ 8 W total, which excludes class-II/copper SFPs, USB host VBUS, more than 50 mA of PMOD loads and very full fabric designs. Heavy designs and the 85F become bench-only.
+- **Chosen: x4 low-profile edge (lane 0 wired) + optional 12 V DC jack for the bench.** The 25 W slot budget covers every scenario including W85, at 13.6 W, which is 54 % of the limit. The supply stays simple: 12 V only, with no 3.3 V split. The jack gives a clean bench supply independent of USB, and is ORed with the slot 12 V through a second TPS2121, which handles up to 22 V. Cost ≈ +$2 and 14 mm more finger length. The board then no longer fits closed-end x1 slots.
+- *Rejected:* stay x1 low-profile at 10 W. This adds the 3.3 V split above (≈ +$1.5). Typical stays at ≈ 5.0 W, 50 % of the limit. Slot mode then needs a documented envelope of ≤ 8 W total, which excludes class-II/copper SFPs, USB host VBUS, more than 50 mA of PMOD loads and very full fabric designs. Heavy designs and the 85F become bench-only.
 - Either way: **USB-C #1 needs a 5 V / 3 A adapter** for anything beyond light designs. A PC port is enough for programming a light design only. *Optional:* route the CC-pin voltage to the FPGA through a comparator, so gateware can detect the source's current capability.
