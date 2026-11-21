@@ -23,7 +23,7 @@ if os.path.exists(os.environ.get('OVR', '__none__')):
     HOLES = [tuple(h) for h in _o['HOLES']]
 PASSIVE = lambda d: re.match(r'^(R|C|FB)\d', d) is not None
 LEDS = ['D%d' % i for i in range(10, 18)]
-moveable = {d for d in cur if PASSIVE(d)} | set(LEDS)
+moveable = ({d for d in cur if PASSIVE(d)} | set(LEDS)) - {'C322', 'C323', 'C340', 'C341', 'C342', 'C343'}
 fixed = {d: p for d, p in cur.items() if d not in moveable}
 POWER = {'GND', '1V2', '3V3', '1V35', '1V8', '1V2_SER', '2V5', 'VCCAUX', 'VCCAUXA', '5V_SYS', '12V_OR', '5V_12', '5V_HDMI',
          'USB2_VBUS', 'VBUS_F', 'SLOT_3V3', '12V_SLOT', 'ETH_1V0', '1V8_FT', '3V3_FTA', 'CK1_VDDO', 'CK2_VDDO',
@@ -70,6 +70,9 @@ def free(r, s, ignore_keep=False):
         if r[0] < o[2] + GAP and r[2] > o[0] - GAP and r[1] < o[3] + GAP and r[3] > o[1] - GAP: return False
     return True
 plan = {d: list(p) for d, p in fixed.items()}
+LABEL = {}
+TEXT_H = 0.8
+def textlen(d): return len(d) * 0.62 * TEXT_H + 0.1
 def commit(d, p): plan[d] = p; add(d, p)
 # ---------- 1. BGA decap slot rings (bottom) ----------
 def bga_ring(anchor, members):
@@ -143,6 +146,70 @@ def side_of(a, px, py):
     x0, y0, x1, y1 = rect(a, fixed[a])
     dists = {'L': px - x0, 'R': x1 - px, 'T': py - y0, 'B': y1 - py}
     return min(dists, key=dists.get)
+
+START_OFF = collections.defaultdict(lambda: 0.6)      # (anchor, side) -> next free offset from the anchor edge
+def place_chunk(a, sd, chunk):
+    ax0, ay0, ax1, ay1 = rect(a, fixed[a])
+    horiz = sd in 'TB'; rot = 90 if horiz else 0
+    sizes = {}
+    for d, px, py in chunk:
+        x0, y0, x1, y1 = crt_vis(d, rot, 1)
+        sizes[d] = ((x1 - x0) if horiz else (y1 - y0), (y1 - y0) if horiz else (x1 - x0))
+    pitch = max(v[0] for v in sizes.values()) + GAP
+    # pins projected on this side's axis, clamped to the side
+    tgt = [min(max(px, ax0), ax1) if horiz else min(max(py, ay0), ay1) for _, px, py in chunk]
+    order = sorted(range(len(chunk)), key=lambda i: tgt[i])
+    chunk = [chunk[i] for i in order]; tgt = [tgt[i] for i in order]
+    mid = sum(tgt) / len(tgt)
+    pos = [mid + (k - (len(chunk) - 1) / 2) * pitch for k in range(len(chunk))]
+    depth = max(v[1] for v in sizes.values())
+    lane = max(textlen(d) for d, _, _ in chunk) + 0.3
+    base = {'L': ax0, 'R': ax1, 'T': ay0, 'B': ay1}[sd]
+    sign = -1 if sd in 'LT' else 1
+    def lane_rect(r):
+        if sd == 'T': return (r[0], r[1] - lane, r[2], r[1])
+        if sd == 'B': return (r[0], r[3], r[2], r[3] + lane)
+        if sd == 'L': return (r[0] - lane, r[1], r[0], r[3])
+        return (r[2], r[1], r[2] + lane, r[3])
+    for use_lane, kmax in ((True, 16), (False, 32)):
+        for k in range(0, kmax):
+            off = START_OFF[(a, sd)] + depth / 2 + 0.25 * k
+            for sh in (0, 0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0, -2.0, 3.0, -3.0, 4.0, -4.0):
+                cand = []
+                for (d, px, py), p in zip(chunk, pos):
+                    c = base + sign * off; q = p + sh
+                    xy = (round(q / 0.05) * 0.05, round(c / 0.05) * 0.05) if horiz else (round(c / 0.05) * 0.05, round(q / 0.05) * 0.05)
+                    cand.append((d, [xy[0], xy[1], rot, 1]))
+                rects = [rect(d, p) for d, p in cand]
+                if not all(free(r, 1) for r in rects): continue
+                lanes = [lane_rect(r) for r in rects]
+                if use_lane and not all(free(l, 1) for l in lanes): continue
+                for (d, p), l in zip(cand, lanes):
+                    commit(d, p)
+                    if use_lane:
+                        occ[1].append((l, d + ':label'))
+                        LABEL[d] = [(l[0] + l[2]) / 2, (l[1] + l[3]) / 2, 90 if horiz else 0]
+                START_OFF[(a, sd)] = off + depth / 2 + (lane if use_lane else 0) + GAP
+                return True
+    return False
+def place_rows(a, sd, items):
+    ax0, ay0, ax1, ay1 = rect(a, fixed[a])
+    left = []
+    sides = [sd] + [s for s in 'TBLR' if s != sd]
+    pending = list(items)
+    for s_ in sides:
+        if not pending: break
+        horiz = s_ in 'TB'
+        side_len = (ax1 - ax0) if horiz else (ay1 - ay0)
+        x0, y0, x1, y1 = crt_vis(pending[0][0], 90 if horiz else 0, 1)
+        pitch = ((x1 - x0) if horiz else (y1 - y0)) + GAP
+        cap = max(1, int((side_len + 3.0) / pitch))
+        nxt = []
+        for i in range(0, len(pending), cap):
+            ch = pending[i:i + cap]
+            if not place_chunk(a, s_, ch): nxt += ch
+        pending = nxt
+    return pending
 fails = []
 for a, mem in groups.items():
     ax0, ay0, ax1, ay1 = rect(a, fixed[a])
@@ -165,44 +232,19 @@ for a, mem in groups.items():
         horiz = sd in 'TB'                 # row runs along x
         items.sort(key=lambda t: t[1] if horiz else t[2])
         rot = 90 if horiz else 0           # pads point at the IC
-        # greedy 1-D packing along the row, centred on the pins
-        sizes = []
-        for d, px, py in items:
-            x0, y0, x1, y1 = crt_vis(d, rot, 1)
-            sizes.append(((x1 - x0) if horiz else (y1 - y0), (y1 - y0) if horiz else (x1 - x0)))
-        pos = []
-        for i, (d, px, py) in enumerate(items):
-            t = px if horiz else py
-            if pos: t = max(t, pos[-1] + (sizes[i - 1][0] + sizes[i][0]) / 2 + GAP)
-            pos.append(t)
-        tgt = [(px if horiz else py) for _, px, py in items]
-        shift = (sum(tgt) - sum(pos)) / len(pos)
-        pos = [p + shift for p in pos]
-        depth = max(s[1] for s in sizes)
-        base = {'L': ax0, 'R': ax1, 'T': ay0, 'B': ay1}[sd]
-        sign = -1 if sd in 'LT' else 1
-        placed = False
-        for k in range(0, 40):              # push the whole row outward until it is free
-            off = 0.6 + depth / 2 + 0.25 * k
-            cand = []
-            for (d, px, py), p in zip(items, pos):
-                c = base + sign * off
-                xy = (round(p / 0.05) * 0.05, round(c / 0.05) * 0.05) if horiz else (round(c / 0.05) * 0.05, round(p / 0.05) * 0.05)
-                cand.append((d, [xy[0], xy[1], rot, 1]))
-            rects = [rect(d, p) for d, p in cand]
-            ok = all(free(r, 1) for r in rects)
-            # members must not overlap each other either
-            if ok:
-                for i in range(len(rects)):
-                    for j in range(i + 1, len(rects)):
-                        r1, r2 = rects[i], rects[j]
-                        if r1[0] < r2[2] + GAP and r1[2] > r2[0] - GAP and r1[1] < r2[3] + GAP and r1[3] > r2[1] - GAP: ok = False
-            if ok:
-                for d, p in cand: commit(d, p)
-                placed = True; break
+        # uniform pitch, centred on the pins, wrapped into rows no longer than the IC side + 3 mm; each row tries
+        # its own side first (with a label lane, then without, sliding along the edge), then the other sides
+        items_left = place_rows(a, sd, items)
+
+        placed = not items_left
+        if not placed: print('row fallback', a, sd, [d for d, _, _ in items_left])
         if not placed:                       # fall back: one by one, spiral from its row slot
-            for (d, px, py), p in zip(items, pos):
-                c = base + sign * (0.6 + depth / 2)
+            ax0, ay0, ax1, ay1 = rect(a, fixed[a])
+            horiz = sd in 'TB'; rot = 90 if horiz else 0
+            base = {'L': ax0, 'R': ax1, 'T': ay0, 'B': ay1}[sd]; sign = -1 if sd in 'LT' else 1
+            for (d, px, py) in items_left:
+                p = px if horiz else py
+                c = base + sign * 1.5
                 tx, ty = (p, c) if horiz else (c, p)
                 done = False
                 for rr in range(0, 120):
@@ -228,6 +270,6 @@ for d in left:
         if done: break
     if not done: fails.append(d)
 missing = [d for d in cur if d not in plan]
-json.dump(plan, open(os.environ.get('OUTPLAN','plan_tidy.json'), 'w')); json.dump({'W':W,'HOLES':HOLES}, open(os.environ.get('OUTPLAN','plan_tidy.json')+'.meta','w'))
+json.dump(plan, open(os.environ.get('OUTPLAN','plan_tidy.json'), 'w')); json.dump(LABEL, open('labels_rows.json', 'w')); json.dump({'W':W,'HOLES':HOLES}, open(os.environ.get('OUTPLAN','plan_tidy.json')+'.meta','w'))
 print('moveable', len(moveable), '| placed', len([d for d in moveable if d in plan]), '| fails', fails, '| missing', missing)
 print('bottom', sum(1 for p in plan.values() if p[3] == 2))

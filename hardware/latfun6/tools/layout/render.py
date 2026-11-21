@@ -19,8 +19,13 @@ for d, (x, y, rot, side) in plan.items():
     for num, (u, v) in localpads[d].items():
         px, py = xf(u, v, rot, side)
         ax.plot(x + px, y + py, '.', ms=1.2, color='#444' if side == 1 else '#c66')
-    if big or d[0] in 'UJYXQ':
+    if False:
         ax.text(x, y, d, fontsize=7 if big else 5, ha='center', va='center', color='k', weight='bold' if big else None)
+import os
+if os.path.exists('labels_final.json'):
+    LB=json.load(open('labels_final.json'))
+    for d,(cx,cy,rot,vis) in LB.items():
+        if vis: ax.text(cx,cy,d,fontsize=3.2,rotation=rot,ha='center',va='center',color='#0a7d22' if plan[d][3]==1 else '#b8860b')
 ax.set_xlim(-12, W + 6); ax.set_ylim(114, -8); ax.set_aspect('equal')
 ax.set_title('LATFUN6 placement draft (top: blue, bottom: red dashed). Bracket = left edge, PCIe fingers = bottom tab')
 ax.grid(alpha=0.2)
