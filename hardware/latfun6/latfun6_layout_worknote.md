@@ -3,7 +3,7 @@
 **Project:** LATFUN6, open ECP5-5G application board
 **Board:** LATFUN6 rev v0.2. File `hardware/EDA/Latfun6.eprj`, PCB document `pcb1`.
 **Date started:** 2026-11-20
-**Status:** W2 v5 written 2026-11-21: card shortened to 145.65 mm (user choice), right region re-planned; next: user review, then W4/W5 stackup + BGA fan-out
+**Status:** W2 v6 (tidy + labels) written 2026-11-21; W5 stackup chosen (JLC06161H-1080B); next: rail test points (schematic), net-class rules (GUI), BGA fan-out
 **Schematic worknote:** `latfun6_worknote.md` (gates A2 / C3 / C4 / D PASS, 2026-11-20)
 **EasyEDA Pro version:** V2.2.47.7
 
@@ -53,7 +53,22 @@ The low-profile outline in definition v0.2 (≤ 68.9 × 167.65 mm) does not fit:
 | Inner4 | 18 | **GND plane** (reference for Bottom) | GND (solid) |
 | Bottom | 2 | signal + BGA decaps; slow nets | GND fill |
 
-Definition v0.2 stackup (SIG/GND/SIG/PWR/GND/SIG). JLC 6-layer impedance stackup code ✱ (pick at W5 and compute 100 Ω / 90 Ω / 40 Ω widths with JLC's calculator). Thickness 1.57 mm (CEM). ⚠ Change the copper count **before** routing: `set_copper_count` wipes all tracks. It is done first, while the board is empty.
+Definition v0.2 stackup (SIG/GND/SIG/PWR/GND/SIG). **Stackup chosen 2026-11-21: JLCPCB JLC06161H-1080B** (6 layers, 1 oz outer / 0.5 oz inner, NP-155F).
+
+| Layers | Dielectric | Thickness | Er |
+|---|---|---|---|
+| L1–L2 | 1080 prepreg | 0.0764 mm | 3.91 |
+| L2–L3 | core | 0.10 mm | 4.36 |
+| L3–L4 | 7628 + bare core 0.70 + 7628 | ≈ 1.12 mm | ≈ 4.44 |
+| L4–L5 | core | 0.10 mm | 4.36 |
+| L5–L6 | 1080 prepreg | 0.0764 mm | 3.91 |
+
+- **Total ≈ 1.604 mm**, against the 1.57 mm CEM nominal (JLC tolerance ±10%).
+- **References:** L3 is tightly coupled to L2 GND, and L4 is far away, so L3 effectively sees GND only. L4/L5 form a 0.10 mm power/GND pair. L6 mirrors L1, referenced to L5.
+- **Source of the numbers:** stack data from JLC's calculator backend (`selectPageImpedanceDefaultTemplate`); widths from JLC's Polar SI9000 solver (`/api/jlcTools/impedance/calc`). Rerun script `scratchpad/scripts/jlccalc.py`.
+- **Calculator settings used:** copper T 1.6 mil (outer) / 0.6 mil (inner), trapezoid top = W − 0.5 mil, solder mask 1.0/0.6/1.0 mil with Er 3.8.
+- **Rejected alternative:** 3313E. It allows wider 100 Ω pairs (3.84/5 mil) but is 1.65 mm thick and has a thicker L1–L2 dielectric.
+- **Order note:** select this stackup by code on the JLC quote, with impedance control on, ±10%. ⚠ Change the copper count **before** routing: `set_copper_count` wipes all tracks. It is done first, while the board is empty.
 
 ## Section 3 — W3: how ground reaches each pin
 
@@ -222,11 +237,14 @@ Draft, to confirm once J12's finger datum is known. Bracket edge = left (x = 0),
 
 | Class | Nets | Track rule | Why (§1 row) |
 |---|---|---|---|
-| SERDES_100 | PCIE_*, SFP_HD*, SMA_*, REFCLK_D*, SFP_TD/RD*, PCIE_TX/RX*, PCIE_REFCLK*, CK*_PRI* | diff pair, width/gap from stackup ✱ | 1 |
-| DDR | DDRAM_* | 40 Ω width ✱; 0.10 mm min inside the ball fields | 2, 3 |
-| HDMI_100 / USB_90 / MDI_100 | GPDI_D*/CLK*, USB_DP/DN, USB2_DP/DN, ETH_MDI* | diff pairs ✱ | 6, 7, 8 |
+| SERDES_100 | SFP_HD*, SFP_TD/RD*, SMA_*, REFCLK_D*, CK*_PRI* | diff **0.100 / 0.203 mm** on L1/L6 (3.9/8 mil: 100 Ω); L3 0.101 / 0.203 | 1 |
+| PCIE_85 | PCIE_HDTX*, PCIE_TX*, PCIE_RX*, PCIE_REFCLK* | diff **0.143 / 0.203 mm** on L1/L6 (5.62/8 mil: 85 Ω, as on the Versa card) | 1 |
+| DDR | DDRAM_* | single-ended **0.125 mm** (L1 ≈ 48 Ω, L3 ≈ 51 Ω: 50 Ω ±10% on both); CK and DQS pairs diff 0.100 / 0.203 mm (100 Ω); neck to 0.09 mm inside the ball fields | 2, 3 |
+| HDMI_100 / MDI_100 | GPDI_D*/CLK*, ETH_MDI* | diff 0.100 / 0.203 mm (100 Ω) | 6, 8 |
+| USB_90 | USB_DP/DN, USB2_DP/DN | diff **0.127 / 0.203 mm** (5.0/8 mil: 90 Ω) | 7 |
 | PWR | 12V_*, 5V_*, 3V3, 1V2, 1V35, 1V8, 1V2_SER, 2V5, VCCAUX*, SW_*, VBUS* | 0.25 / 0.5 / 3.0 mm (min 0.25 allows necking at pads) | 4 |
-| default | everything else | 0.10 / 0.15 / 2.54 mm | ⛔ rows |
+| default | everything else | 0.10 / 0.15 / 2.54 mm (JLC min 0.09 mm, 3 mil allowed in BGA fan-out) | ⛔ rows |
+| vias | BGA dog-bone 0.20 / 0.40 mm (hole/pad), POFV default at 6 layers; general 0.30 / 0.60 mm | | 3 |
 
 Rule values are set in the GUI (the MCP cannot create rules).
 
