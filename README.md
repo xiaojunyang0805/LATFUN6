@@ -1,5 +1,10 @@
 # LATFUN6: an open ECP5 textbook board
 
+<p align="center">
+  <img src="docs/img/latfun6_3d.png" alt="LATFUN6 board, 3D view from EasyEDA Pro" width="760">
+  <br><sub>v0.2 layout, 3D view (145 x 102 mm, 8 layers). Per-layer pictures: <a href="hardware/latfun6/layout/">hardware/latfun6/layout</a></sub>
+</p>
+
 An open-hardware **Lattice ECP5-5G** application board defined by the curriculum of the free, bilingual
 [Open FPGA Tutorial](https://xiaojunyang0805.github.io/Free_FPGA_Tutorial/). Every on-board feature maps to a
 course lab, and verification is built in: test points, rail current shunts, a logic-analyser header, loopbacks,
