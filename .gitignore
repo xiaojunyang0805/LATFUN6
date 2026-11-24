@@ -1,0 +1,28 @@
+# build outputs
+hardware/latfun6/test/build/
+__pycache__/
+*.pyc
+# vendor files are not redistributed (download per tools/gen_board.py docstring)
+*.csv
+*.pdf
+# private working notes (kept local; see README)
+docs/handoff-LATFUN6.md
+docs/ulx3s-study.md
+notes/
+hardware/latfun6/latfun6_worknote.md
+hardware/latfun6/latfun6_layout_worknote.md
+hardware/latfun6/FPGA_Availability_Note.md
+
+# EasyEDA project files are local until reviewed (never publish a file derived from another project)
+hardware/EDA/
+*.eprj
+hardware/latfun6/test/*.log
+
+# layout process artifacts (routing runs, logs, debug renders, candidates) stay local
+hardware/latfun6/route*/
+hardware/latfun6/route_*.log
+hardware/latfun6/tools/layout/*.png
+hardware/latfun6/tools/layout/ddr_*.json
+en/
+# published layout pictures (exception to the *.pdf rule above)
+!hardware/latfun6/layout/*.pdf
